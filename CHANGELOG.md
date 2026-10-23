@@ -1,5 +1,7 @@
 ## 2026-10-23 — Research historical-quality gate (TSK-007/008/012 partial)
 
+- Expose archived-replay quality gate summary and calendar certification limitations in the existing web asset-detail modal, with HTML-escaped values.
+
 - Add deterministic offline research-snapshot quality checks: session-date mismatch and tampering, weekend equity bars, continuous crypto daily close/coverage, large unexplained equity price gaps and zero volume.
 - Accept optional bounded, explicitly *unverified* external session lists, and reject missing/out-of-calendar sessions only for a fully covered supplied period. Handle evidence-only corporate actions and same-basis independent-source price discrepancies without inventing trusted data.
 - Expose a read-only private `/v1/history/quality/{instrument_id}` endpoint and offline audit CLI; integrate fail-closed anomalies into archived replay without altering the legacy scanner or strategy rules.

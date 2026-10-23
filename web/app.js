@@ -91,6 +91,9 @@ async function openArchivedBacktest(id, strategy) {
       <div class="metric"><small>Holdout</small><b>${esc(result.holdout?.status ?? 'UNAVAILABLE')}</b></div></div>
       <p class="tiny">First observed cutoff: ${esc(a.as_of_observation)}<br>Snapshot SHA-256: <code style="overflow-wrap:anywhere">${esc(a.sha256)}</code></p>
       <p class="tiny">Data quality: ${a.quality_flags.map(esc).join(', ') || 'No flags'}.</p>
+      <div class="card" style="padding:12px;margin:10px 0"><b>Historical quality gate: ${esc(a.quality_report?.status ?? 'NOT_AUDITED')}</b>
+      <p class="tiny">Calendar coverage: ${esc(a.quality_report?.calendar_coverage ?? 'UNKNOWN')} · Calendar validated: NO · Corporate actions verified: NO · PIT validated: NO</p>
+      <p class="tiny">Audit findings: ${esc(JSON.stringify(a.quality_report?.finding_counts ?? {}))}</p></div>
       <p class="tiny">Rejections: ${esc(JSON.stringify(result.diagnostics?.setup_rejection_reasons || {}))}</p>
       <div class="notice">Snapshot time means first seen by this app, NOT historically available when each trade would have occurred. Corporate actions/calendar/true PIT availability are NOT verified. No provider call was made.</div>`;
   } catch (error) {

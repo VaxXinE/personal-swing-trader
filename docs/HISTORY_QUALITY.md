@@ -54,3 +54,8 @@ Save under a local non-Git directory and invoke `--calendar /absolute/path/sessi
 ## Acceptance / reproducibility
 
 Offline tests exercise normal archive, missing session, duplicate/out-of-scope calendars, weekend equity and missing crypto days, SHA-preserved session metadata tampering, split evidence, cross-source conflicts, currency/basis mismatch, API and CLI without provider access. All changes are additive, and the original history SQLite schema requires **no migration**.
+
+
+## Website display
+
+Archived Backtest modal now surfaces the research quality-gate status, calendar coverage, and finding counts. The label `STRUCTURAL_PASS` does not imply a certified exchange calendar or corporate-action adjustment. Blocking issues return an API 422 with a reviewable error instead of drawing a fabricated performance report.
