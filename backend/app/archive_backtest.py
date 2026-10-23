@@ -14,6 +14,7 @@ import re
 from .backtest import MIN_WARMUP, replay
 from .domain import Candle, Instrument
 from .history import HistoryError, HistoryStore
+from .history_quality import audit_snapshot
 
 
 class SnapshotMismatch(HistoryError):
@@ -96,6 +97,13 @@ def replay_from_archive(
     if expected_snapshot_sha256 is not None and fingerprint != expected_snapshot_sha256:
         raise SnapshotMismatch('Archived candle snapshot differs from expected fingerprint')
 
+    quality = audit_snapshot(instrument, snapshot,
+                             actions=store.actions(instrument.instrument_id, source=source,
+                                                   as_of=snapshot['as_of_observation']))
+    if quality['status'] == 'BLOCKED':
+        raise HistoryError('Archive quality requires manual review: ' + ', '.join(
+            code for code, count in quality['finding_counts'].items() if count))
+
     flags = set(snapshot['quality_flags'])
     # Independently check adjacent archived rows. The current archive's per-row
     # checksum covers payload_json, not flags_json or market session metadata;
@@ -121,6 +129,7 @@ def replay_from_archive(
     result = replay(instrument, bars, strategy=strategy, horizon=horizon)
     result['archive_snapshot'] = {
         'source': source, 'price_basis': price_basis,
+        'quality_report': quality,
         'as_of_observation': snapshot['as_of_observation'],
         'sha256': fingerprint,
         'rows': snapshot['rows'],

@@ -191,3 +191,8 @@ python scripts/archive_backtest.py --mode demo --instrument-id US:NASDAQ:MSFT --
 ```
 
 The asset details modal also has an **Archived backtest** button. Results identify `archive_snapshot.as_of_observation` and `archive_snapshot.sha256`; send both back to check against later revisions. Mode/basis mismatches and unsafe price gaps fail closed. This is **research-only**, NOT historical point-in-time certification or executable trading. See [Archived Backtest Integration](docs/ARCHIVED_BACKTEST_INTEGRATION.md).
+
+
+## Historical Quality Audit v1 (2026-10-23)
+
+Offline, read-only data-quality review (session-date recomputation, crypto continuity, weekday equity sanity, split-size jumps, optional bounded manual session lists and independent-source close comparison) is available via `python scripts/history_quality_audit.py --mode demo --instrument-id US:NASDAQ:MSFT --json` and private `GET /v1/history/quality/{instrument_id}`. Archived backtests reject blocking anomalies; no API accepts provider URLs or local calendar file paths. **Calendar, original vendor price basis, corporate actions, source independence and historical point-in-time availability remain unverified.** See [History Quality Audit](docs/HISTORY_QUALITY.md).

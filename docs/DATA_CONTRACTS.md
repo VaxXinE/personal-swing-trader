@@ -86,3 +86,8 @@ Parquet suggested layout `data/market/<provider>/<asset_type>/<timeframe>/year=Y
 ## Implementation mapping (2026-10-23)
 
 Historical Data Engine v1 now implements the **observation archive** subset in `backend/app/history.py` (see [HISTORICAL_DATA_ENGINE](HISTORICAL_DATA_ENGINE.md)). Original provider and adjustment-time facts that predate the first archive observation **remain unknown**; the new API never returns them as certified. The full contract above (exchange calendars, corrected raw/adjusted series, source-time point-in-time facts, delisted historical universe and snapshot calibration) is still incomplete, and the archive must not be used to assert a validated OOS strategy.
+
+
+## Research quality-gate implementation (2026-10-23)
+
+`backend/app/history_quality.py` provides a provider-free snapshot QC layer for TSK-007/008/012 partial: candle/session metadata consistency, chronological crypto completeness, preliminary equity weekday guard, suspicious price moves, optional manually provided session lists, and optional source-comparison evidence. Its `STRUCTURAL_PASS` status is **not** the same as `calendar_validated=true`. Until an authoritative, archived, reviewed trading calendar and corporate-action/RAW-price history are integrated, quality remains research-only; missing equity sessions cannot be inferred from weekdays alone. See [HISTORY_QUALITY](HISTORY_QUALITY.md).
