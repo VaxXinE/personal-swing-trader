@@ -75,3 +75,5 @@ The report's `evidence_sha256` fingerprints the selected archived candle revisio
 Calendar and reference `observed_at` dates later than the selected archive snapshot cutoff now **BLOCK** reconciliation, rather than being silently treated as known at that time. Corporate-action reads now return **the latest revision observed by the requested cutoff**, preserving a reproducible historical view.
 
 The feature is additive and offline: no new dependencies, network permissions, price adjustments, exchange-calendar certification or automated execution. The macOS XProtect popup remains unresolved.
+
+The evidence digest is intentionally **content-addressed**, not wall-clock-addressed: repeated audits of identical revisions/evidence keep the same SHA-256 even when `as_of_observation` advances without any new observations. Pin `--as-of` separately to reproduce the exact visibility cutoff.

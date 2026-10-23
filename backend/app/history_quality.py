@@ -237,7 +237,6 @@ def audit_snapshot(instrument: Instrument, snapshot: Mapping, *,
     source_hash = (reference.get('sha256') or _digest(reference)) if reference is not None else None
     evidence_hash = _digest({
         'instrument_id': instrument.instrument_id,
-        'as_of_observation': snapshot['as_of_observation'],
         'source': snapshot.get('source'),
         'price_basis': snapshot.get('price_basis'),
         'candles': [

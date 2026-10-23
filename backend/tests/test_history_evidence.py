@@ -141,3 +141,13 @@ def test_evidence_asof_action_revisions_do_not_change_old_snapshot(tmp_path):
     assert len(before)==len(after)==1
     assert before[0]['revision']==1 and after[0]['revision']==2
     assert before[0]['evidence']['value']=='2' and after[0]['evidence']['value']=='3'
+
+
+def test_evidence_hash_does_not_change_with_clock_only(tmp_path):
+    ins,store,snap,clock=store_and_snapshot(tmp_path)
+    before=audit_snapshot(ins,snap)
+    clock.time=datetime(2026,9,2,tzinfo=timezone.utc)
+    later=store.read(ins.instrument_id,source='SYNTHETIC_FIXTURE',price_basis='SYNTHETIC')
+    after=audit_snapshot(ins,later)
+    assert later['as_of_observation']!=snap['as_of_observation']
+    assert before['evidence_sha256']==after['evidence_sha256']
