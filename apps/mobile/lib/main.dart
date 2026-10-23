@@ -79,32 +79,9 @@ class _ShellState extends State<Shell> {
     if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
   }
   Future<void> _settings() async {
-    final url = TextEditingController(text: api.baseUrl);
-    final token = TextEditingController(text: api.token);
-    await showDialog<void>(context: context, builder: (ctx) => AlertDialog(
-      title: const Text('Private backend connection'),
-      content: SingleChildScrollView(child: Column(mainAxisSize: MainAxisSize.min, children: [
-        const Text('Emulator: http://10.0.2.2:8000. Phone fisik: alamat VPN/private server. Jangan expose API ke internet publik.', style: TextStyle(fontSize: 12)),
-        const SizedBox(height: 12),
-        TextField(controller: url, decoration: const InputDecoration(labelText: 'API base URL')),
-        TextField(controller: token, obscureText: true, decoration: const InputDecoration(labelText: 'Bearer token (opsional di localhost)')),
-        const SizedBox(height: 10),
-        const Text('Token hanya tersimpan selama aplikasi berjalan; bukan dalam file aplikasi.', style: TextStyle(fontSize: 11, color: secondary))
-      ])),
-      actions: [TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
-        FilledButton(onPressed: () async {
-          final u = Uri.tryParse(url.text.trim());
-          if (u == null || (u.scheme != 'http' && u.scheme != 'https') || u.host.isEmpty) {
-            _snack('Alamat harus berupa URL http/https valid'); return;
-          }
-          api.baseUrl = url.text.trim(); api.token = token.text;
-          final prefs = await SharedPreferences.getInstance();
-          await prefs.setString('base_url', api.baseUrl);
-          if (ctx.mounted) Navigator.pop(ctx);
-          await refresh();
-        }, child: const Text('Connect'))],
-    ));
-    url.dispose(); token.dispose();
+    final saved = await showDialog<bool>(context: context,
+      builder: (_) => _ConnectionDialog(api: api, onError: _snack));
+    if (saved == true) await refresh();
   }
 
   @override Widget build(BuildContext context) {
@@ -242,21 +219,9 @@ class _ShellState extends State<Shell> {
     if(journal.isEmpty)const Padding(padding:EdgeInsets.all(24),child:Text('No entries yet.'))];
   Future<void> _newTrade() async {
     if(opportunities.isEmpty)return;
-    final entry=TextEditingController(),qty=TextEditingController(),exit=TextEditingController();
-    String id=opportunities.first['instrument_id'].toString();
-    await showDialog<void>(context:context,builder:(ctx)=>StatefulBuilder(builder:(ctx,update)=>AlertDialog(
-      title:const Text('Record paper trade'),content:SingleChildScrollView(child:Column(mainAxisSize:MainAxisSize.min,children:[
-        DropdownButtonFormField<String>(value:id,isExpanded:true,items:{for (final o in opportunities) o['instrument_id'].toString(): o['symbol'].toString()}
-          .entries.map((e)=>DropdownMenuItem(value:e.key,child:Text(e.value))).toList(),onChanged:(v)=>update(()=>id=v??id)),
-        TextField(controller:entry,keyboardType:TextInputType.number,decoration:const InputDecoration(labelText:'Entry price')),
-        TextField(controller:qty,keyboardType:TextInputType.number,decoration:const InputDecoration(labelText:'Quantity')),
-        TextField(controller:exit,keyboardType:TextInputType.number,decoration:const InputDecoration(labelText:'Exit (optional)'))])),
-      actions:[TextButton(onPressed:()=>Navigator.pop(ctx),child:const Text('Cancel')),
-        FilledButton(onPressed:()async{try{await api.call('/journal/trades',method:'POST',body:{
-          'instrument_id':id,'mode':'PAPER','side':'LONG','entry':entry.text,'quantity':qty.text,
-          if(exit.text.isNotEmpty)'exit':exit.text});if(ctx.mounted)Navigator.pop(ctx);await refresh();}catch(e){_snack(e.toString());}},child:const Text('Save'))]
-    )));
-    entry.dispose();qty.dispose();exit.dispose();
+    final saved=await showDialog<bool>(context:context,
+      builder:(_)=>_TradeDialog(api:api,opportunities:opportunities,onError:_snack));
+    if(saved==true)await refresh();
   }
 }
 
@@ -385,4 +350,79 @@ class _BuilderPageState extends State<BuilderPage> {
       const SizedBox(height:20),FilledButton(onPressed:saving?null:()=>_save(true),child:const Text('Validate, save version & run')),
       const SizedBox(height:8),OutlinedButton(onPressed:saving?null:()=>_save(false),child:const Text('Save version only'))
     ]));
+}
+
+/// Owns its controllers so they are disposed with the dialog's element, after the exit animation.
+class _ConnectionDialog extends StatefulWidget {
+  const _ConnectionDialog({required this.api, required this.onError});
+  final SwingApi api;
+  final void Function(String) onError;
+  @override State<_ConnectionDialog> createState() => _ConnectionDialogState();
+}
+
+class _ConnectionDialogState extends State<_ConnectionDialog> {
+  late final url = TextEditingController(text: widget.api.baseUrl);
+  late final token = TextEditingController(text: widget.api.token);
+
+  @override void dispose() { url.dispose(); token.dispose(); super.dispose(); }
+
+  Future<void> _connect() async {
+    final u = Uri.tryParse(url.text.trim());
+    if (u == null || (u.scheme != 'http' && u.scheme != 'https') || u.host.isEmpty) {
+      widget.onError('Alamat harus berupa URL http/https valid'); return;
+    }
+    widget.api.baseUrl = url.text.trim(); widget.api.token = token.text;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('base_url', widget.api.baseUrl);
+    if (mounted) Navigator.pop(context, true);
+  }
+
+  @override Widget build(BuildContext context) => AlertDialog(
+    title: const Text('Private backend connection'),
+    content: SingleChildScrollView(child: Column(mainAxisSize: MainAxisSize.min, children: [
+      const Text('Emulator: http://10.0.2.2:8000. Phone fisik: alamat VPN/private server. Jangan expose API ke internet publik.', style: TextStyle(fontSize: 12)),
+      const SizedBox(height: 12),
+      TextField(controller: url, decoration: const InputDecoration(labelText: 'API base URL')),
+      TextField(controller: token, obscureText: true, decoration: const InputDecoration(labelText: 'Bearer token (opsional di localhost)')),
+      const SizedBox(height: 10),
+      const Text('Token hanya tersimpan selama aplikasi berjalan; bukan dalam file aplikasi.', style: TextStyle(fontSize: 11, color: secondary))
+    ])),
+    actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+      FilledButton(onPressed: _connect, child: const Text('Connect'))],
+  );
+}
+
+class _TradeDialog extends StatefulWidget {
+  const _TradeDialog({required this.api, required this.opportunities, required this.onError});
+  final SwingApi api;
+  final List<Map<String, dynamic>> opportunities;
+  final void Function(String) onError;
+  @override State<_TradeDialog> createState() => _TradeDialogState();
+}
+
+class _TradeDialogState extends State<_TradeDialog> {
+  final entry=TextEditingController(),qty=TextEditingController(),exit=TextEditingController();
+  late String id=widget.opportunities.first['instrument_id'].toString();
+
+  @override void dispose(){entry.dispose();qty.dispose();exit.dispose();super.dispose();}
+
+  Future<void> _save() async {
+    try{
+      await widget.api.call('/journal/trades',method:'POST',body:{
+        'instrument_id':id,'mode':'PAPER','side':'LONG','entry':entry.text,'quantity':qty.text,
+        if(exit.text.isNotEmpty)'exit':exit.text});
+      if(mounted)Navigator.pop(context,true);
+    }catch(e){widget.onError(e.toString());}
+  }
+
+  @override Widget build(BuildContext context) => AlertDialog(
+    title:const Text('Record paper trade'),content:SingleChildScrollView(child:Column(mainAxisSize:MainAxisSize.min,children:[
+      DropdownButtonFormField<String>(value:id,isExpanded:true,items:{for (final o in widget.opportunities) o['instrument_id'].toString(): o['symbol'].toString()}
+        .entries.map((e)=>DropdownMenuItem(value:e.key,child:Text(e.value))).toList(),onChanged:(v)=>setState(()=>id=v??id)),
+      TextField(controller:entry,keyboardType:TextInputType.number,decoration:const InputDecoration(labelText:'Entry price')),
+      TextField(controller:qty,keyboardType:TextInputType.number,decoration:const InputDecoration(labelText:'Quantity')),
+      TextField(controller:exit,keyboardType:TextInputType.number,decoration:const InputDecoration(labelText:'Exit (optional)'))])),
+    actions:[TextButton(onPressed:()=>Navigator.pop(context),child:const Text('Cancel')),
+      FilledButton(onPressed:_save,child:const Text('Save'))],
+  );
 }
