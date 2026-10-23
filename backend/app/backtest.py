@@ -5,6 +5,7 @@ probability estimate, or claims of out-of-sample *validation*.
 """
 from __future__ import annotations
 
+from collections import Counter
 from statistics import mean, median
 from math import isfinite
 from .domain import (Instrument, Candle, calculate_features, detect_strategy,
@@ -65,37 +66,51 @@ def replay(ins: Instrument, bars: list[Candle], strategy: str = 'PULLBACK',
     candidate_count = 0
     gate_pass_count = 0
     nonoverlap_skip = 0
+    examined_signal_bars = 0
+    setup_rejected = Counter()
+    gate_rejected = Counter()
+    entry_rejected = Counter()
     next_eligible_signal = MIN_WARMUP
 
     for i in range(MIN_WARMUP, max(MIN_WARMUP, n - horizon)):
         if i < next_eligible_signal:
             nonoverlap_skip += 1
             continue
+        examined_signal_bars += 1
         prefix = bars[:i + 1]
         f = calculate_features(prefix)
         setup = detect_strategy(ins, prefix, f, strategy)
         if setup['status'] != 'QUALIFIED' or setup['target'] is None:
+            # Count each failed check independently. These are NOT disjoint buckets.
+            reasons = setup.get('reason_codes') or ['NOT_QUALIFIED_UNSPECIFIED']
+            setup_rejected.update(dict.fromkeys(reasons, 1))
             continue
         candidate_count += 1
         historical_liquidity = liquidity(ins, prefix, f, None)['historical']
         gate = evaluate_research_gate(setup, historical_liquidity, f['atr_14'])
         if gate['status'] != 'PASS':
+            # Separate research-gate failures from technical setup failures.
+            gate_rejected.update(dict.fromkeys(gate.get('reason_codes') or [f"GATE_{gate['status']}"], 1))
             continue
         gate_pass_count += 1
         entry, stop, target = setup['entry'], setup['stop'], setup['target']
         if not all(isfinite(v) for v in (entry, stop, target)) or not target > entry > stop > 0:
+            entry_rejected['INVALID_GEOMETRY'] += 1
             continue
         nextbar = bars[i + 1]
         atr = f['atr_14']
         if nextbar.open > entry + 0.5 * atr:
+            entry_rejected['CHASE_GAP_REJECTED'] += 1
             continue  # reject chase gaps, never assume fill at the stale trigger
         if nextbar.open >= entry:
             fill = nextbar.open
         elif nextbar.high >= entry:
             fill = entry  # same-bar sequencing ambiguous; STOP takes precedence
         else:
+            entry_rejected['ENTRY_NOT_TOUCHED'] += 1
             continue  # one-session limit/stop research entry; unfilled is skipped
         if fill >= target:
+            entry_rejected['FILL_AT_OR_ABOVE_TARGET'] += 1
             continue
         # Conservative fill-denominator: apply modeled entry + exit friction on
         # both profitable trades and stops, and model adverse opening gaps.
@@ -103,6 +118,7 @@ def replay(ins: Instrument, bars: list[Candle], strategy: str = 'PULLBACK',
         modeled_stop = stop * (1 - FRICTION_PER_SIDE)
         initial_risk = invested - modeled_stop
         if not initial_risk > 0:
+            entry_rejected['NONPOSITIVE_RISK'] += 1
             continue
         outcome = 'TIMEOUT'
         exit_index = i + horizon
@@ -124,6 +140,7 @@ def replay(ins: Instrument, bars: list[Candle], strategy: str = 'PULLBACK',
         proceeds = exit_price * (1 - FRICTION_PER_SIDE)
         net_r = (proceeds - invested) / initial_risk
         if not isfinite(net_r):
+            entry_rejected['NONFINITE_RETURN'] += 1
             continue
         partition = 'HOLDOUT' if i + 1 >= holdout_start else 'DEVELOPMENT'
         results.append({'signal_at': bars[i].at, 'entry_at': nextbar.at,
@@ -151,6 +168,17 @@ def replay(ins: Instrument, bars: list[Candle], strategy: str = 'PULLBACK',
         'qualified_setups_examined': candidate_count,
         'research_gate_passed': gate_pass_count,
         'overlap_skipped_bars': nonoverlap_skip,
+        'diagnostics': {
+            'eligible_signal_bars': examined_signal_bars,
+            'qualified_setups': candidate_count,
+            'research_gate_passed': gate_pass_count,
+            'completed_trades': len(results),
+            'overlap_skipped_bars': nonoverlap_skip,
+            'setup_rejection_reasons': dict(sorted(setup_rejected.items())),
+            'research_gate_rejection_reasons': dict(sorted(gate_rejected.items())),
+            'entry_rejection_reasons': dict(sorted(entry_rejected.items())),
+            'note': 'Rejection reasons may overlap per signal; counts are diagnostic, not calibrated probabilities.',
+        },
         'assumption': 'Final EOD signals; next-bar entry; one open trade; same-bar stop first; gap-through-stop at opening; 0.1% modeled friction each side.',
         'limitations': [
             'Chronological holdout is descriptive, not independent validation or walk-forward optimization',

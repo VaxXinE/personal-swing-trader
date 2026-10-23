@@ -14,3 +14,26 @@
 - `validated` always `false`, even when sample counts are large. Limitations explicitly include survivorship, missing delistings/corporate action validation, OHLC barrier ambiguity, cost approximation, exchange rule gaps and incomplete independent holdout testing.
 
 To inspect without triggering LIVE provider calls, use the app's **demo** data mode or offline fixtures. If macOS displays "Malicious Script Blocked" during LIVE scans, stop LIVE workflows and investigate separately; no software patch alone is evidence that the warning has been resolved.
+
+## Zero-trade diagnostics
+
+`replay(...)["diagnostics"]` adds backward-compatible stage counts:
+`eligible_signal_bars`, `qualified_setups`, `research_gate_passed`,
+`completed_trades`, and independent rejection reason maps for technical setups,
+research-gate checks and next-bar hypothetical entries. Reason maps are
+**multi-label** (a candle may fail multiple checks); do not sum as unique bars.
+These explain sample scarcity without relaxing strategy parameters.
+
+For DEMO testing without external market providers:
+
+```bash
+SWING_DATA_MODE=demo PYTHONPATH=backend python - <<'PY'
+from app.domain import INSTRUMENTS
+from app.providers import demo_bars
+from app.backtest import replay
+from pprint import pprint
+ins = next(x for x in INSTRUMENTS if x.symbol == 'MSFT')
+r = replay(ins, demo_bars(ins), 'PULLBACK', 10)
+pprint(r['diagnostics'])
+PY
+```

@@ -127,3 +127,35 @@ def test_invalid_candles_are_rejected_without_cleaning(monkeypatch):
     bars[30]=replace(bars[30],low=120)  # higher than close
     with pytest.raises(ValueError,match='OHLC'):
         backtest.replay(INSTRUMENTS[0],bars)
+
+
+def test_empty_replay_explains_technical_rejection_without_faking_trades(monkeypatch):
+    seen = []
+    monkeypatch.setattr(backtest, 'calculate_features', lambda prefix: {'atr_14': 10})
+    def fake_setup(*args):
+        seen.append(True)
+        return {'status': 'WATCH', 'target': None,
+                'reason_codes': ['CONFIRMATION_PENDING', 'TARGET_UNSUPPORTED']}
+    monkeypatch.setattr(backtest, 'detect_strategy', fake_setup)
+    r = backtest.replay(INSTRUMENTS[0], make_bars(250), horizon=10)
+    d = r['diagnostics']
+    assert r['samples'] == 0 and r['validated'] is False
+    assert d['eligible_signal_bars'] == len(seen) == 30
+    assert d['qualified_setups'] == d['research_gate_passed'] == 0
+    assert d['setup_rejection_reasons'] == {
+        'CONFIRMATION_PENDING': 30,
+        'TARGET_UNSUPPORTED': 30,
+    }
+    assert d['entry_rejection_reasons'] == {}
+
+
+def test_qualified_gate_does_not_mean_entry_filled(monkeypatch):
+    enable_synthetic_signals(monkeypatch, entry=105, target=115)
+    r = backtest.replay(INSTRUMENTS[0],
+                        make_bars(260, opening=99, high=104, low=96, close=100), horizon=3)
+    d = r['diagnostics']
+    assert r['samples'] == 0
+    assert d['eligible_signal_bars'] > 0
+    assert d['qualified_setups'] == d['research_gate_passed'] > 0
+    assert d['entry_rejection_reasons']['ENTRY_NOT_TOUCHED'] == d['research_gate_passed']
+    assert d['completed_trades'] == 0
