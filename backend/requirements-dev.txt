@@ -1,2 +1,4 @@
 -r requirements.txt
 pytest>=8,<10
+# Needed by test_timestamp_provenance.py, which constructs a real DataFrame.
+pandas>=2.2,<3
