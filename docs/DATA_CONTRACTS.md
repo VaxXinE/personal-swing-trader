@@ -91,3 +91,8 @@ Historical Data Engine v1 now implements the **observation archive** subset in `
 ## Research quality-gate implementation (2026-10-23)
 
 `backend/app/history_quality.py` provides a provider-free snapshot QC layer for TSK-007/008/012 partial: candle/session metadata consistency, chronological crypto completeness, preliminary equity weekday guard, suspicious price moves, optional manually provided session lists, and optional source-comparison evidence. Its `STRUCTURAL_PASS` status is **not** the same as `calendar_validated=true`. Until an authoritative, archived, reviewed trading calendar and corporate-action/RAW-price history are integrated, quality remains research-only; missing equity sessions cannot be inferred from weekdays alone. See [HISTORY_QUALITY](HISTORY_QUALITY.md).
+
+
+## Observed candidate universe (2026-10-24)
+
+`backend/app/universe_history.py` stores **observation-time** snapshots of today's manual/discovered candidate list, not authoritative historical securities master data. Archived replay reports whether each bar predates the first observed roster, is in a previously observed roster, or is absent from a sampled roster (`UNKNOWN`, not delisted). This avoids *claiming* complete historic eligibility but does not remove survivorship bias, establish IPO/delisting dates, or provide a licensed complete historical universe. See [HISTORICAL_UNIVERSE](HISTORICAL_UNIVERSE.md).

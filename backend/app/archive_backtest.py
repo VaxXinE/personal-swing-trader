@@ -15,6 +15,7 @@ from .backtest import MIN_WARMUP, replay
 from .domain import Candle, Instrument
 from .history import HistoryError, HistoryStore
 from .history_quality import audit_snapshot
+from .universe_history import UniverseHistory
 
 
 class SnapshotMismatch(HistoryError):
@@ -49,6 +50,7 @@ def replay_from_archive(
     as_of: str | None = None,
     limit: int = 2500,
     expected_snapshot_sha256: str | None = None,
+    expected_universe_evidence_sha256: str | None = None,
 ) -> dict:
     """Replay a bounded archive snapshot; never silently switch to live prices.
 
@@ -65,6 +67,8 @@ def replay_from_archive(
         raise HistoryError('Invalid archive limit')
     if expected_snapshot_sha256 is not None and not _HASH.fullmatch(expected_snapshot_sha256):
         raise HistoryError('Snapshot fingerprint must be 64 lowercase hex characters')
+    if expected_universe_evidence_sha256 is not None and not _HASH.fullmatch(expected_universe_evidence_sha256):
+        raise HistoryError('Universe fingerprint must be 64 lowercase hex characters')
 
     expected_source = 'SYNTHETIC_FIXTURE' if mode == 'demo' else (
         'BINANCE_SPOT_EOD' if instrument.market == 'CRYPTO' else 'YFINANCE_RESEARCH_RAW')
@@ -126,10 +130,16 @@ def replay_from_archive(
         raise HistoryError(f'Insufficient archived candles: need at least {MIN_WARMUP + horizon + 1}')
 
     bars = [Candle(**row['candle']) for row in snapshot['candles']]
+    universe_evidence = UniverseHistory(store.path).report(
+        instrument, bars, mode=mode, as_of=snapshot['as_of_observation'])
+    if (expected_universe_evidence_sha256 is not None and
+            expected_universe_evidence_sha256 != universe_evidence['evidence_sha256']):
+        raise SnapshotMismatch('Archived universe evidence differs from expected fingerprint')
     result = replay(instrument, bars, strategy=strategy, horizon=horizon)
     result['archive_snapshot'] = {
         'source': source, 'price_basis': price_basis,
         'quality_report': quality,
+        'universe_evidence': universe_evidence,
         'as_of_observation': snapshot['as_of_observation'],
         'sha256': fingerprint,
         'rows': snapshot['rows'],

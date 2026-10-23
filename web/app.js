@@ -91,6 +91,10 @@ async function openArchivedBacktest(id, strategy) {
       <div class="metric"><small>Holdout</small><b>${esc(result.holdout?.status ?? 'UNAVAILABLE')}</b></div></div>
       <p class="tiny">First observed cutoff: ${esc(a.as_of_observation)}<br>Snapshot SHA-256: <code style="overflow-wrap:anywhere">${esc(a.sha256)}</code></p>
       <p class="tiny">Data quality: ${a.quality_flags.map(esc).join(', ') || 'No flags'}.</p>
+      <p class="tiny"><b>Historical universe: ${esc(a.universe_evidence?.status ?? 'UNKNOWN')}</b><br>
+      Membership evidence: ${esc(JSON.stringify(a.universe_evidence?.candidate_observation_counts ?? {}))}<br>
+      Universe evidence SHA-256: ${esc(a.universe_evidence?.evidence_sha256 ?? 'not captured')}<br>
+      Historical membership verified: NO · Survivorship bias resolved: NO.</p>
       <div class="card" style="padding:12px;margin:10px 0"><b>Historical quality gate: ${esc(a.quality_report?.status ?? 'NOT_AUDITED')}</b>
       <p class="tiny">Calendar coverage: ${esc(a.quality_report?.calendar_coverage ?? 'UNKNOWN')} · Calendar validated: NO · Corporate actions verified: NO · PIT validated: NO</p>
       <p class="tiny">Audit findings: ${esc(JSON.stringify(a.quality_report?.finding_counts ?? {}))}</p></div>

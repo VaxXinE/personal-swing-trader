@@ -1,3 +1,10 @@
+## 2026-10-24 — Historical candidate-universe observations (TSK-013 partial)
+
+- Persist bounded, immutable *observed candidate* registry snapshots in the existing historical SQLite archive via a separate offline CLI; use actual observation times rather than invented historical listing dates.
+- Audit each archived candle against only roster observations available by that candle's time; distinguish observed candidates from unknown/not sampled, never mark absence as delisted.
+- Add reproducible universe-evidence fingerprint and optional fail-closed pin in archived replay CLI and API, a private capture-metadata endpoint and web disclosure.
+- Retain `RESEARCH_ONLY`, `validated:false`, old scanner and strategy logic; no market-data API calls, external plugin hooks, or new dependencies.
+
 ## 2026-10-23 — Historical evidence reconciliation v1 (TSK-012 partial)
 
 - Add bounded local second-source close evidence reader and optional CLI comparison without downloading or trusting a vendor claimed by the file.

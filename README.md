@@ -199,3 +199,8 @@ Offline, read-only data-quality review (session-date recomputation, crypto conti
 
 
 Research-only cross-source reconciliation: `python scripts/history_quality_audit.py --mode demo --instrument-id US:NASDAQ:MSFT --reference /path/to/local-evidence.json --json`. It requires explicitly supplied offline evidence, enforces observation cutoffs, and prints `evidence_sha256` for repeatable audits. See [History Quality](docs/HISTORY_QUALITY.md). No third-party agent installers or hooks are used; the `anti-slop` and `ponytail` source guidance informed minimal scope and plain comments only.
+
+
+## Observed candidate universe (TSK-013 partial)
+
+Current registry/discovery samples cannot prove who was listed historically. You can explicitly archive **current sampled membership** without a network request via `python scripts/universe_capture.py --mode demo`; Archived Backtest now reports per-bar `UNKNOWN_BEFORE_OBSERVATION`, `OBSERVED_CANDIDATE` and `UNKNOWN_NOT_IN_SAMPLE` counts and a separately pinnable universe evidence fingerprint. Nothing here certifies IPO/delisting timelines or removes survivorship bias. See [Historical Universe](docs/HISTORICAL_UNIVERSE.md).

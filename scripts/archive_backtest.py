@@ -22,6 +22,7 @@ def main(argv=None) -> int:
     p.add_argument('--limit', type=int, default=2500)
     p.add_argument('--as-of')
     p.add_argument('--expected-snapshot-sha256')
+    p.add_argument('--expected-universe-evidence-sha256')
     p.add_argument('--db', type=Path, default=settings.db_path.parent / 'history.sqlite')
     args = p.parse_args(argv)
     ins = next((i for i in get_instruments(args.mode) if i.instrument_id == args.instrument_id), None)
@@ -36,6 +37,7 @@ def main(argv=None) -> int:
             price_basis=basis, strategy=args.strategy, horizon=args.horizon,
             as_of=args.as_of, limit=args.limit,
             expected_snapshot_sha256=args.expected_snapshot_sha256,
+            expected_universe_evidence_sha256=args.expected_universe_evidence_sha256,
         )
     except (HistoryError, SnapshotMismatch, ArchiveNotFound) as exc:
         print(f'Archive replay rejected: {exc}', file=sys.stderr)
@@ -44,6 +46,8 @@ def main(argv=None) -> int:
     print(f"{ins.symbol} / {args.strategy}: archived_rows={archive['rows']} trades={result['samples']}")
     print(f"snapshot_as_of={archive['as_of_observation']}")
     print(f"snapshot_sha256={archive['sha256']}")
+    print(f"universe_evidence_sha256={archive['universe_evidence']['evidence_sha256']}")
+    print(f"historical_universe={archive['universe_evidence']['status']} counts={archive['universe_evidence']['candidate_observation_counts']}")
     print(f"quality_flags={','.join(archive['quality_flags'])}")
     print(f"setup_rejections={result['diagnostics']['setup_rejection_reasons']}")
     print('RESEARCH_ONLY; verified=false; no LIVE provider call was made')

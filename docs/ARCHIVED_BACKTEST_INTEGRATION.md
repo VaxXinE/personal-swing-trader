@@ -59,3 +59,8 @@ node --check web/app.js
 ```
 
 Historical archive check covers the local provider-free replay, mode/basis mismatches, revisions and stable as-of hashes, explicit 409 failure, quarantining suspicious data, payload corruption, private API access, missing/insufficient history, and offline CLI.
+
+
+## Candidate-roster observation status
+
+An archived replay additionally returns `archive_snapshot.universe_evidence` (observed candidate-roster counts by bar, source/mode, and a SHA-256 evidence fingerprint). Use `--expected-universe-evidence-sha256` to detect changes independently of the candle revision fingerprint. The current registry cannot establish historic IPO/delisting or listing membership, so the evidence never changes `validated:false`. See [HISTORICAL_UNIVERSE](HISTORICAL_UNIVERSE.md).
