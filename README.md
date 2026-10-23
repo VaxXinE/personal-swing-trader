@@ -18,7 +18,7 @@ Requirements: **Python 3.11+** and internet access for installing Python depende
 bash scripts/start.sh
 ```
 
-The launcher installs backend dependencies into `.venv/`, runs the local API on **127.0.0.1:8000**, and serves the fully functional responsive web application at:
+The launcher does **not** install or download dependencies at startup. Prepare the virtual environment explicitly:\n\n```bash\npython3 -m venv .venv\nsource .venv/bin/activate\npython -m pip install -r backend/requirements.txt\n# For LIVE data instead, install: python -m pip install -r backend/requirements-live.txt\n```\n\nThe launcher runs the local API on **127.0.0.1:8000**, and serves the fully functional responsive web application at:
 
 **http://127.0.0.1:8000/**
 
@@ -156,3 +156,12 @@ On `localhost`, `127.0.0.1`, and `::1`, the app does **not** register its PWA se
 This browser-cache change is **not** proof that a malware warning was a false positive and does not replace OS/browser security checks. If a warning recurs, do not bypass it; inspect the browser alert's source, extensions, requested URL and browser/OS security logs. An API response only confirms backend availability, not device integrity.
 
 Run `node scripts/pwa_smoke.cjs` for isolated PWA policy checks, and `node --check web/app.js` / `node --check web/pwa.js` for syntax.
+
+
+## Security hardening & Backtest V2 research update (2026-10-23)
+
+Startup scripts `scripts/start.sh` and `scripts/start.bat` **never run pip install**. Install/update dependencies explicitly during a reviewed setup operation, not when clicking Run Scan. Existing `.venv` environments continue to work without reinstalling anything.
+
+`GET /v1/backtests/{instrument_id}?strategy=PULLBACK&horizon=10` now has a bounded, non-overlapping, stop-first OHLC replay, 0.1% modeled friction per side, and chronological DEVELOPMENT vs HOLDOUT descriptive slices. Results stay `RESEARCH_ONLY`, `validated:false`, with metrics withheld for fewer than 20 completed trades. See [Backtest V2](docs/BACKTEST_V2.md).
+
+Review [the macOS security audit](docs/SECURITY_AUDIT_2026-10-23.md): no source-level causal link to the OS popup was established. **Do not re-run LIVE scan solely to reproduce the warning**, or disable XProtect/Gatekeeper. Continue validation with offline fixtures and DEMO mode while the Mac alert remains unresolved.
