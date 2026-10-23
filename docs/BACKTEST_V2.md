@@ -37,3 +37,30 @@ r = replay(ins, demo_bars(ins), 'PULLBACK', 10)
 pprint(r['diagnostics'])
 PY
 ```
+
+## Diagnostic result: all baseline DEMO fixtures can legitimately return zero
+
+`demo_bars()` uses pseudo-random deterministic price paths and quote-turnover estimates,
+**not** a scenario generator calibrated to exercise every trading pattern. In
+particular it does not deliberately generate 1.5x+ relative-volume breakout days,
+while `detect_strategy` requires breakout confirmation **and** structural targets
+with minimum risk/reward. For the 310-bar demo fixtures, only 90 bars are eligible
+for the 210-bar-warmup / 10-bar-horizon test. An all-zero result is a limitation
+of these fixtures; it is **not** evidence the strategy is bad or good in markets.
+
+Run a bounded offline batch report without starting a server or fetching live data:
+
+```bash
+python scripts/backtest_demo_diagnostics.py
+python scripts/backtest_demo_diagnostics.py --json
+```
+
+The end-to-end smoke fixtures in `backend/tests/test_backtest_integration.py`
+intentionally engineer one qualifying PULLBACK and BREAKOUT signal each, using the
+**real** strategy calculations, liquidity checks and research gate (no stubs),
+then verify next-day entry/target and the `validated: false` contract.
+The very profitable individual synthetic fixture is deliberately NOT a performance
+claim or an input for strategy parameter tuning. Do not relax live criteria solely
+to make the DEMO generator print trades. Next research milestone: real
+point-in-time historical candidate universe, split-adjustment checks, transaction
+friction measured by market, and held-out multi-symbol period tests.
