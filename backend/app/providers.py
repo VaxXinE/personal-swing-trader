@@ -2,7 +2,7 @@
 from __future__ import annotations
 import math
 import random
-from datetime import datetime, timezone, timedelta, time
+from datetime import datetime, timezone, timedelta, time, date
 from zoneinfo import ZoneInfo
 import httpx
 from .domain import Instrument,Candle,Quote
@@ -47,6 +47,27 @@ def demo_bars(ins:Instrument, count:int=310) -> list[Candle]:
     return bars
 
 
+def equity_session_markers(market: str, session_date: date) -> tuple[datetime, datetime]:
+    """Return estimated normal-session close and a later conservative EOD availability guard.
+
+    Daily Yahoo rows identify a trading session, not a timestamp for an individual
+    executed trade. Store an explicit, derived close marker, never the guard time.
+    Special exchange holidays/early closures require a real calendar (not in V1).
+    """
+    if market == 'US':
+        zone = ZoneInfo('America/New_York')
+        close_time, ready_time = time(16, 0), time(17, 0)
+    elif market == 'IDX':
+        zone = ZoneInfo('Asia/Jakarta')
+        # Regular closing matching may run until 16:01:59 WIB.
+        close_time, ready_time = time(16, 2), time(16, 30)
+    else:
+        raise ValueError('Unsupported equity market')
+    close_at = datetime.combine(session_date, close_time, tzinfo=zone).astimezone(timezone.utc)
+    ready_after = datetime.combine(session_date, ready_time, tzinfo=zone).astimezone(timezone.utc)
+    return close_at, ready_after
+
+
 def fetch_yfinance(ins:Instrument) -> tuple[list[Candle],Quote|None]:
     try:
         import yfinance as yf
@@ -58,13 +79,12 @@ def fetch_yfinance(ins:Instrument) -> tuple[list[Candle],Quote|None]:
         import pandas as pd
         now=datetime.now(timezone.utc)
         market_zone=ZoneInfo('America/New_York' if ins.market=='US' else 'Asia/Jakarta')
-        cutoff=time(17) if ins.market=='US' else time(16,30)
         output=[]
         for index,row in frame.iterrows():
             dt=pd.Timestamp(index).to_pydatetime().astimezone(market_zone)
             session_date=dt.date()
-            close_dt=datetime.combine(session_date,cutoff,tzinfo=market_zone).astimezone(timezone.utc)
-            if close_dt>=now: continue # protect against in-progress daily bars
+            close_dt, ready_after = equity_session_markers(ins.market, session_date)
+            if ready_after>=now: continue # protect against in-progress/unsettled daily bars
             if any(pd.isna(row[x]) for x in ('Open','High','Low','Close','Volume')):continue
             # Reinvestment-adjusted bars are NOT used as raw execution prices.
             # Historical splits may require adjustment during a production-quality backtest.

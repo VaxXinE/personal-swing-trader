@@ -51,3 +51,9 @@
 - `node --check web/app.js`: passed.
 - `python scripts/browser_e2e.py`: **blocked** by environment browser `ERR_BLOCKED_BY_ADMINISTRATOR`; not counted as passed.
 - PWA install metadata and GitHub Android build workflow: files included, **not validated on a physical phone nor in GitHub CI**.
+
+## 2026-10-23 — Market timestamp provenance hotfix
+
+- Yahoo daily equity rows carry a trading-session date, not a trustworthy precise last-trade timestamp. Previously the conservative readiness guard (17:00 America/New_York / 16:30 Asia/Jakarta) was reused as the candle close timestamp. Now it is a separate guard from the **derived normal-session close marker** (US 16:00 ET; IDX 16:02 WIB after regular closing matching).
+- Every new setup includes `candle_metadata`: `timestamp_basis`, `finality_basis`, `last_session_date`, `age_hours_at_scan`, `validation_scope`, and `calendar_validated=false`. These are explicit limitations, not a claim of verified live quotes. Data Health shows market coverage and timestamp provenance.
+- This is a partial safety fix, not a complete official session calendar. Early close/holidays and provider latency need dedicated calendars and point-in-time sources. Existing SQLite signal/run snapshots remain intentionally unchanged; re-run scanner to produce new metadata.
