@@ -1,4 +1,4 @@
-# Implementation Status — Alpha 0.2.0
+# Implementation Status — Alpha 0.2.1
 
 **As of:** 2026-10-23. This tracks features honestly relative to `PRD.md`. Data in demo mode is fictional; trading probabilities are gated off.
 
@@ -62,10 +62,16 @@
 
 - US: Nasdaq Trader directory parsing and bounded month-rotating sample; **not full market / not liquidity-ranked**.
 - Crypto: Binance active USDT spot candidates sorted by rolling 24h quote volume, then historical ADV20 scanned.
-- IDX: explicit official CSV import, no undocumented API or misleading full auto-coverage.
+- IDX: direct official XLSX import (CSV remains supported), no undocumented API or misleading full auto-coverage. File-format unit tests pass; real export compatibility should be verified locally.
 - `data/discovered_universe.json`: local atomic snapshot, partial failure retains existing market; manual config wins on duplicate IDs; demo isolated; cap 250 total.
 - API GET `/v1/universe/discovery`, per-market `coverage` in scan results and Data Health panel.
 - Explorer grouped into one card per asset (best matched setup) with strategy breakdown; cross-market results still separate rather than ranking uncalibrated scores together.
 - LIVE provider EOD successful reads are cached in memory for 15 minutes. Not realtime. Scanning is still sequential.
 - Offline parser/sync regression tests: **35/35 backend tests**, HTTP smoke and mock browser UI smoke passed locally. Provider connectivity after deployment not yet verified.
 - **Outstanding:** IDX official historical trading status, Nasdaq directory candidate liquidity prescreen, provider batch calls, full historical point-in-time universe, production Android build, probability validation, session-calendar aware scheduler.
+
+## v0.2.1 — IDX Excel import
+
+- Import .xlsx or .csv for IDX using `--idx-file`, with bounded OOXML parsing and no extra pip dependency.
+- Workbook data never executes Excel formulas/macros; failures preserve the last valid discovery snapshot.
+- Verification: 41 backend tests passed in this environment (35 previous + 6 XLSX tests). No live IDX workbook was provided for integration testing.

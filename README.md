@@ -2,7 +2,7 @@
 
 **Bahasa Indonesia / Quick Start:** [START_HERE_ID.md](START_HERE_ID.md). Untuk developer, mulai dari [AGENTS.md](AGENTS.md) dan [IMPLEMENTATION_STATUS.md](IMPLEMENTATION_STATUS.md).
 
-**Version:** `0.2.0-alpha` · **Date:** 2026-10-23 · **Owner:** single developer/user · **Scope:** long-only; US + IDX equities and crypto spot.
+**Version:** `0.2.1-alpha` · **Date:** 2026-10-23 · **Owner:** single developer/user · **Scope:** long-only; US + IDX equities and crypto spot.
 
 > **THIS IS A WORKING ALPHA, NOT A FINISHED FORECAST PLATFORM.** The browser app and private API work in synthetic demo mode, and optional market data adapters exist. No trade execution. Quote verification, fundamentals, historical-bias-free validation, and ML probabilities are **not** production ready. All synthetic data is labelled, and all forecasts are withheld.
 
@@ -35,9 +35,13 @@ python scripts/sync_universe.py --markets US CRYPTO
 SWING_DATA_MODE=live python scripts/scan_once.py
 ```
 
-For IDX, export a CSV from the official IDX stock-listing page, then run
-`python scripts/sync_universe.py --markets IDX --idx-csv /path/to/idx-list.csv`.
-This is **NOT a fully automatic IDX integration**. The UI Data Health page shows source, count, sync date and analysis coverage. Candidate pre-selection is not a claim of actual liquidity. US discovery deliberately samples the directory; crypto uses rolling 24h volume only before the true ADV20 filter. Discovery is local/explicit, never called on every dashboard request. See [docs/DYNAMIC_UNIVERSE_V2.md](docs/DYNAMIC_UNIVERSE_V2.md) for details and limitations.
+For IDX, download the official IDX stock-listing **`.xlsx`** file and import directly (no conversion):
+
+```bash
+python scripts/sync_universe.py --markets IDX --idx-file "$HOME/Downloads/Daftar Saham.xlsx" --idx-limit 35
+```
+
+`.csv` is still supported with the same `--idx-file` flag. The legacy `--idx-csv` flag remains accepted. Header rows may occur after an introductory title, and the importer inspects multiple worksheets for `Kode` / `Nama Perusahaan` / optional `Papan Pencatatan`. Special Monitoring Board rows are excluded only when identified. **The original Excel file is never modified.** This is **NOT a fully automatic IDX integration**. The UI Data Health page shows source, count, sync date and analysis coverage. Candidate pre-selection is not a claim of actual liquidity. US discovery deliberately samples the directory; crypto uses rolling 24h volume only before the true ADV20 filter. Discovery is local/explicit, never called on every dashboard request. See [docs/DYNAMIC_UNIVERSE_V2.md](docs/DYNAMIC_UNIVERSE_V2.md) for details and limitations.
 
 ## 2. Optional REAL market research data
 
@@ -57,7 +61,7 @@ On Windows: `.venv\Scripts\activate.bat`, `pip install -r backend\requirements-l
 - Provider errors are shown under Data Health and **never** replaced with synthetic prices when LIVE is active.
 - Backtest remains **research-only** and may have survivorship and corporate-action biases. Scores are heuristics, not win probabilities. No REALTIME label on historical EOD data.
 
-**Important:** the app scans only symbols in `config/universe.json`. This alpha does **not** automatically discover every listed equity or crypto pair; exchange listings/market-rules as-of history need later engineering.
+**Important:** the app scans the union of manual `config/universe.json` and successfully synced `data/discovered_universe.json` while in LIVE mode (bounded to 250 instruments). It does **not** automatically discover every listed equity or crypto pair; exchange listings/market-rules as-of history need later engineering.
 
 ## 3. Installable Web App and private Android build
 
@@ -109,7 +113,7 @@ The app has no brokerage connections, withdrawal capability, or automated execut
 | `backend/app/storage.py` | SQLite watchlist, journal, screener versions and signals |
 | `backend/app/main.py` | FastAPI + endpoints + private token guard |
 | `config/universe.json` | Editable manual baseline symbol/market registry |
-| `scripts/sync_universe.py` | Opt-in dynamic candidate discovery from US/Binance and official IDX CSV |
+| `scripts/sync_universe.py` | Opt-in candidate discovery from US/Binance and official IDX XLSX or CSV |
 | `data/discovered_universe.json` | Gitignored local discovery snapshot (created on sync) |
 | `scripts/scan_once.py` | EOD scan to schedule via OS cron/task scheduler |
 | `scripts/backup.py` | SQLite consistent backup (unencrypted: store encrypted separately) |

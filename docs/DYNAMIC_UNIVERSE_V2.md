@@ -10,7 +10,7 @@ Expand the initial 19-symbol manual registry without hardcoding more names, usin
 
 1. `config/universe.json`: stable user-maintained baseline, authoritative on duplicate canonical IDs.
 2. `python scripts/sync_universe.py --markets US CRYPTO`: user-initiated discovery. This command uses known HTTPS provider hosts (no user-supplied API URL). It writes `data/discovered_universe.json` atomically; the file is gitignored.
-3. `--markets IDX --idx-csv <path>`: import a **user-exported official IDX CSV** with `Kode`, `Nama Perusahaan`, optionally `Papan Pencatatan`. Does not fetch/scrape unofficial IDX APIs. Rows from Papan Pemantauan Khusus are excluded **only if** column is present; absence of board info is NOT a status verification.
+3. `--markets IDX --idx-file <path.xlsx>`: import an **official IDX Excel listing** (CSV is also accepted) with `Kode`, `Nama Perusahaan`, optionally `Papan Pencatatan`. Does not fetch/scrape unofficial IDX APIs. Rows from Papan Pemantauan Khusus are excluded **only if** column is present; absence of board info is NOT a status verification.
 4. In LIVE mode only, `registry.get_instruments('live')` merges baseline + discovery, up to 250 unique canonical IDs. DEMO intentionally uses the 19 baseline instruments to keep tests deterministic.
 5. **Run Scan separately** to compute OHLCV history, 20-session ADV/median turnover, EOD indicators, score, and exclusion reasons. Latest scan is stored as an immutable snapshot. A new sync DOES NOT mutate an old scan.
 6. GET `/v1/universe/discovery` provides source/sync provenance and counts; `/v1/opportunities` provides per-market attempted/analyzed/excluded/errors coverage from the last scan. Data Health shows both. No network calls during ordinary screen viewing.
@@ -21,7 +21,7 @@ Expand the initial 19-symbol manual registry without hardcoding more names, usin
 |---|---|---|
 | US | Nasdaq Trader `nasdaqlisted.txt` and `otherlisted.txt`; exclude ETF/test/special instruments and known Nasdaq financial status issues | Official directory has no turnover. Deterministic month-rotating symbol sample is NOT the top liquid companies or full-US scan. Provider may change text fields. The 20-day ADV filter runs later. |
 | Crypto | Binance spot `exchangeInfo` + rolling-24h `/ticker/24hr` in USDT, capped top-ranked by recent quote volume | 24-hour quote volume only prescreens candidates. It is not ADV20. The scanner checks final daily candles, historical turnover, spread when available and active-symbol status. Region/provider availability may vary. |
-| IDX | Explicit CSV import from IDX listing page | No reliable public automatic IDX directory adapter is claimed. CSV age, board/suspension status and price tick histories need independent verification. |
+| IDX | Direct .xlsx import (or CSV) from IDX listing page | No reliable public automatic IDX directory adapter is claimed. File age, board/suspension status and tick histories need independent verification. |
 
 Listings do NOT prove active accessibility at the user's broker. A symbol's live tradability / corporate action / exchange calendar / split handling remain incomplete. Quote freshness and transaction cost can prevent execution verification even when a historical liquidity filter passes.
 
@@ -31,7 +31,7 @@ Listings do NOT prove active accessibility at the user's broker. A symbol's live
 # From repository root, with .venv activated or python3 accessible:
 python scripts/sync_universe.py --markets US CRYPTO
 python scripts/sync_universe.py --markets US --us-limit 15
-python scripts/sync_universe.py --markets IDX --idx-csv ~/Downloads/idx-stock-list.csv --idx-limit 30
+python scripts/sync_universe.py --markets IDX --idx-file "$HOME/Downloads/Daftar Saham.xlsx" --idx-limit 35
 # After sync, start (or keep) the live backend and click Run Scan in dashboard:
 bash scripts/start.sh --live --port 8001
 ```
@@ -48,6 +48,14 @@ Set each per-market limit from 1 to 75; baseline + discovery cannot exceed 250 c
 
 ## Verification and known limitations
 
-Tests use local fixture responses and exercise parser validation, 24h-vs-ADV distinction, IDX CSV, fail-preserving snapshot, registry precedence, and API coverage. No real provider production connectivity was verified in the build environment. US 'liquid' candidates may be few when the directory's selected samples are illiquid. A future US price/volume first-stage source would improve candidate selection, but should not be fabricated from directory membership.
+Tests use local fixture responses and exercise parser validation, 24h-vs-ADV distinction, IDX XLSX/CSV, shifted headers, multiple sheets, malformed workbook, fail-preserving snapshot, registry precedence, and API coverage. No real provider production connectivity was verified in the build environment. US 'liquid' candidates may be few when the directory's selected samples are illiquid. A future US price/volume first-stage source would improve candidate selection, but should not be fabricated from directory membership.
 
 Suggested next steps: official IDX status/calendar integration, batched historical data retrieval with provider throttling, quote freshness/reconciliation, proper time-aware historical universe snapshots, and price-source confidence validation.
+
+## IDX official XLSX importer (0.2.1-alpha)
+
+The importer reads `.xlsx` using a constrained OOXML parser with no runtime spreadsheet dependency. Shared strings and inline string cells are supported; formulas are **never evaluated**. It selects the worksheet with the most valid IDX codes and searches for known column headers within the first 40 nonempty rows. Column order can vary; blank or explanatory rows before the header are allowed. Source files are read-only and not uploaded to any service.
+
+Accepted headers include `Kode`, `Kode Saham`, `Nama Perusahaan`, `Nama Emiten`, and optionally `Papan Pencatatan`. Valid listed codes must be exactly four A-Z letters. The user-exported sheet is not an authoritative live suspension feed. A malformed/oversized Excel file fails closed and does not replace the previous successful discovery snapshot. An eight-megabyte compressed size and 36-megabyte inflated XML limit reduce zip-bomb risk. `.xls` and `.xlsm` are deliberately not accepted.
+
+IDX discovery remains capped at 75 new candidates per sync. A successful import does not imply Yahoo Finance daily OHLCV is available for every ticker; check Data Health after Run Scan.

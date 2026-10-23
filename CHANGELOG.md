@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.1-alpha (2026-10-23)
+- Import official IDX `.xlsx` listing directly, with shifted header and multi-worksheet handling; CSV compatibility retained.
+- Exclude Papan Pemantauan Khusus when the board column exists; validate four-letter ticker and preserved previous snapshot on failure.
+- No additional Python package needed for XLSX parsing, no formula evaluation or external file upload; defensive archive size limits.
+- 6 new XLSX regression tests, including malformed/oversized workbook behavior. Import against a real BEI export still requires local validation.
+
+
 ## 0.2.0-alpha (2026-10-23)
 - Opt-in Dynamic Liquid Universe candidate discovery, provider-specific sourcing, atomic local cache, bounded registry expansion.
 - Data Health discovery/scan coverage, grouped Opportunity Explorer per asset, API discovery endpoint.

@@ -2,7 +2,7 @@
 
 Examples:
   python scripts/sync_universe.py --markets US CRYPTO
-  python scripts/sync_universe.py --markets IDX --idx-csv ~/Downloads/idx-saham.csv
+  python scripts/sync_universe.py --markets IDX --idx-file ~/Downloads/Daftar-Saham.xlsx
 """
 from __future__ import annotations
 import argparse
@@ -19,12 +19,13 @@ def main() -> int:
     parser.add_argument('--us-limit', type=int, default=24)
     parser.add_argument('--crypto-limit', type=int, default=18)
     parser.add_argument('--idx-limit', type=int, default=35)
-    parser.add_argument('--idx-csv', type=Path, help='Exported IDX stock listing CSV (Kode, Nama Perusahaan, Papan Pencatatan)')
+    parser.add_argument('--idx-file', '--idx-xlsx', '--idx-csv', dest='idx_file', type=Path,
+                        help='Official IDX listing .xlsx (or .csv), containing Kode / Nama Perusahaan / Papan Pencatatan')
     args = parser.parse_args()
     try:
         result = sync_discovery(args.markets, us_limit=args.us_limit,
                                 crypto_limit=args.crypto_limit, idx_limit=args.idx_limit,
-                                idx_csv=args.idx_csv)
+                                idx_file=args.idx_file)
         print(json.dumps(result, indent=2, ensure_ascii=False))
         return 2 if result['errors'] else 0
     except DiscoveryError as exc:

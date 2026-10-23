@@ -33,11 +33,13 @@ python scripts/sync_universe.py --markets US CRYPTO
 
 Jika status sukses, kembali ke web aplikasi di port 8001 dan klik **Run Scan**. Lihat **Data Health** untuk jumlah aset yang ditemukan, dipilih, dianalisis, dikecualikan, atau gagal. Default discovery menambahkan maksimum 24 kandidat AS dan 18 pair crypto (beberapa bisa duplikat baseline).
 
-IDX **belum dapat auto-sync dari bursa**. Unduh CSV daftar saham dari situs resmi BEI, pastikan kolom `Kode`, `Nama Perusahaan`, bila ada `Papan Pencatatan`, lalu:
+IDX **belum dapat auto-sync dari bursa**, tapi **sekarang menerima XLSX langsung**. Unduh file Excel `Daftar Saham...xlsx` dari situs resmi BEI; pastikan ada kolom `Kode`, `Nama Perusahaan`, dan bila tersedia `Papan Pencatatan`. Jalankan:
 
 ```bash
-python scripts/sync_universe.py --markets IDX --idx-csv ~/Downloads/saham-idx.csv
+python scripts/sync_universe.py --markets IDX --idx-file "$HOME/Downloads/Daftar Saham.xlsx" --idx-limit 35
 ```
+
+Ganti nama/path file Excel sesuai hasil unduhan. Untuk melihat nama file, jalankan `ls -1 ~/Downloads/*.xlsx`. Alternatif alias: `--idx-xlsx`. Import CSV lama juga tetap bisa (`--idx-csv`). Bila workbook punya header di baris lain atau beberapa worksheet, parser akan memilih sheet dengan daftar ticker terbanyak. File sumber tidak diubah. Jika format tidak dikenali, sync akan gagal **tanpa menghapus hasil sinkronisasi IDX sebelumnya**. Setelah berhasil, kembali ke dashboard LIVE dan klik **Run Scan**. Default 35 kandidat tambahan IDX (maksimum 75 per sync); ini bukan impor semua saham sebagai kandidat sekaligus.
 
 Perhatikan: daftar US yang baru ditemukan belum diperingkat berdasarkan likuiditas; crypto pra-seleksi menggunakan volume 24 jam, sedangkan filter historis memakai ADV20. **Keduanya tidak menjamin bisa dieksekusi.** Bila provider gagal, skrip mengembalikan error dan tidak mengganti daftar lama dengan data palsu. Baca `docs/DYNAMIC_UNIVERSE_V2.md`.
 

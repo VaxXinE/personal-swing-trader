@@ -1,6 +1,6 @@
 {
   "project": "Personal Swing Intelligence",
-  "version": "0.2.0-alpha",
+  "version": "0.2.1-alpha",
   "date": "2026-10-23",
   "type": "Runnable FastAPI + browser research alpha, Flutter source, optional unverified GitHub Android build",
   "warnings": [
@@ -38,18 +38,18 @@
     },
     {
       "path": "CHANGELOG.md",
-      "bytes": 2371,
-      "sha256": "a95dcd8d982ef5291d585751eb7006a772496c7f3d12c1065cde26f29738e26f"
+      "bytes": 2943,
+      "sha256": "09e887617de5c84e062c5c022fcdee0d1bdfeebe2378e31cc747732c34562a2c"
     },
     {
       "path": "IMPLEMENTATION_STATUS.md",
-      "bytes": 7879,
-      "sha256": "594abbbb95d7bf28656b5b9d4bd8c5656b45879202b5c0cf3a493aaad61d384d"
+      "bytes": 8381,
+      "sha256": "d41b36633e6ce371a9a915d2593e93261664303ca056560fdf5d169547738440"
     },
     {
       "path": "MANIFEST.md",
-      "bytes": 1471,
-      "sha256": "c3551be3c580b840149decfc66ebac80f7320c95c07cd0469e0fa2e37f65c21c"
+      "bytes": 1476,
+      "sha256": "7b0779884ecd6e3e8221e8033bb77008bb49931859ae7f23a5d99cadaafabceb"
     },
     {
       "path": "PRD.md",
@@ -58,13 +58,13 @@
     },
     {
       "path": "README.md",
-      "bytes": 10511,
-      "sha256": "066532fea54cc2b3b91e119a699fc06808a3c2e0f511e937009b010cd8ae4cb3"
+      "bytes": 11058,
+      "sha256": "65e4edcf1d7cf847c77a525e91a8c0267e69d5efd9a0997615d0ca017e8728d1"
     },
     {
       "path": "START_HERE_ID.md",
-      "bytes": 5779,
-      "sha256": "bae3a5a7d3d9ebe06d8acf888c69460e436672f369bd851b54bc8f96e6bc5a72"
+      "bytes": 6500,
+      "sha256": "c3eeacaf6e4011357f5430c2d4b16f0330dc959c88460f50c42d00802cb5f6a4"
     },
     {
       "path": "apps/mobile/analysis_options.yaml",
@@ -143,8 +143,13 @@
     },
     {
       "path": "backend/app/universe.py",
-      "bytes": 13356,
-      "sha256": "bf2d5836e6b8b5d4e737b1874940882755e61a1ac328955196ba7e1407880f3d"
+      "bytes": 15703,
+      "sha256": "d6c53c70cbdaeae22d07eb3de6d2bd89cc79b9c7edc1d18ddd640d2e9250a918"
+    },
+    {
+      "path": "backend/app/xlsx_rows.py",
+      "bytes": 5597,
+      "sha256": "4f6fd69dabefd87a0977ce6ffd96af65d581dcc0fb49ece8b76da0b362ce5014"
     },
     {
       "path": "backend/requirements-dev.txt",
@@ -185,6 +190,11 @@
       "path": "backend/tests/test_dynamic_universe.py",
       "bytes": 7254,
       "sha256": "b2f44aa76af24df46ad2a767039ef0c6879d5caf8ad3d0f1d0f8fc1ad3c927fb"
+    },
+    {
+      "path": "backend/tests/test_idx_xlsx.py",
+      "bytes": 5676,
+      "sha256": "6bc5a6ef0668b46a8b9696a740a7e2b41d1484ecab685345f98b9f09dcc928b7"
     },
     {
       "path": "backend/tests/test_rules.py",
@@ -253,8 +263,8 @@
     },
     {
       "path": "docs/DYNAMIC_UNIVERSE_V2.md",
-      "bytes": 5777,
-      "sha256": "aaf8639763e9c1ef19cdce05d50e48674dbee61ced873abf0aaaeb17d9ddbbe8"
+      "bytes": 7053,
+      "sha256": "9e1570ca36a296b0296bb762dc9409df08c1f94bc0bd1b4347b13773e33cdbc5"
     },
     {
       "path": "docs/EXPLANATION_POLICY.md",
@@ -403,8 +413,8 @@
     },
     {
       "path": "scripts/sync_universe.py",
-      "bytes": 1572,
-      "sha256": "2dfef12a8166aa3603c977be83f70a6cc7ab1522ac3667802c16622400507c01"
+      "bytes": 1666,
+      "sha256": "bb73bf6a4c381604be69cedb34f850e0aa8b46856a77728d9991c54cb3262ed3"
     },
     {
       "path": "scripts/ui_smoke.py",

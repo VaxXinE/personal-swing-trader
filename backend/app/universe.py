@@ -140,37 +140,83 @@ def discover_crypto(client: httpx.Client, limit: int, minimum_quote_volume: floa
     return [r[1] for r in ranked[:limit]], total_active
 
 
-def discover_idx_csv(path: Path, limit: int) -> tuple[list[Instrument], int]:
-    if not path.is_file():
-        raise DiscoveryError('IDX CSV not found; export official IDX stock list first')
-    if path.stat().st_size > 4_000_000:
-        raise DiscoveryError('IDX CSV exceeds maximum allowed 4 MB')
-    raw = path.read_text(encoding='utf-8-sig')
-    try:
-        dialect = csv.Sniffer().sniff(raw[:4096], delimiters=',;\t')
-    except csv.Error:
-        raise DiscoveryError('IDX CSV requires comma, semicolon or tab delimiter') from None
-    reader = csv.DictReader(io.StringIO(raw), dialect=dialect)
-    if reader.fieldnames is None:
-        raise DiscoveryError('Missing CSV headers')
-    keys = {k.strip().casefold(): k for k in reader.fieldnames}
-    code_key = next((keys[k] for k in ('kode', 'kode saham', 'code', 'symbol', 'ticker') if k in keys), None)
-    name_key = next((keys[k] for k in ('nama perusahaan', 'nama', 'name', 'company name') if k in keys), None)
-    board_key = next((keys[k] for k in ('papan pencatatan', 'papan', 'board') if k in keys), None)
-    if not code_key or not name_key:
-        raise DiscoveryError('IDX CSV needs Kode and Nama Perusahaan headers')
+def _idx_columns(header: list[str]) -> tuple[int, int, int | None] | None:
+    """Resolve column positions in an IDX official listing or user CSV export."""
+    keys = {' '.join(str(item).strip().casefold().replace('_', ' ').split()): index
+            for index, item in enumerate(header)}
+    code = next((keys[k] for k in ('kode', 'kode saham', 'code', 'symbol', 'ticker', 'stock code') if k in keys), None)
+    name = next((keys[k] for k in ('nama perusahaan', 'nama emiten', 'nama', 'name', 'company name',
+                                  'company', 'company name (id)') if k in keys), None)
+    board = next((keys[k] for k in ('papan pencatatan', 'papan', 'board', 'listing board') if k in keys), None)
+    if code is None or name is None:
+        return None
+    return code, name, board
+
+
+def _parse_idx_table(rows: list[list[str]]) -> list[Instrument]:
+    """Find a valid IDX header within the first 40 rows and read subsequent entries."""
+    fields = None
+    start = 0
+    for index, row in enumerate(rows[:40]):
+        fields = _idx_columns(row)
+        if fields is not None:
+            start = index + 1
+            break
+    if fields is None:
+        return []
+    code_col, name_col, board_col = fields
     found: dict[str, Instrument] = {}
-    for row in reader:
-        code = (row.get(code_key) or '').strip().upper()
-        if not IDX_RE.fullmatch(code) or not (row.get(name_key) or '').strip():
+    for row in rows[start:]:
+        code = row[code_col].strip().upper() if len(row) > code_col else ''
+        name = row[name_col].strip() if len(row) > name_col else ''
+        if not IDX_RE.fullmatch(code) or not name:
             continue
-        if board_key and 'pemantauan khusus' in (row.get(board_key) or '').casefold():
+        if board_col is not None and len(row) > board_col and 'pemantauan khusus' in row[board_col].casefold():
             continue
-        found[code] = _instrument('IDX', code, row[name_key], 'IDX', code + '.JK')
-    if not found:
-        raise DiscoveryError('No valid IDX stocks after filtering')
-    pool = sorted(found.values(), key=lambda x: x.symbol)
-    return pool[:limit], len(pool)
+        found[code] = _instrument('IDX', code, name, 'IDX', code + '.JK')
+    return list(found.values())
+
+
+def discover_idx_file(path: Path, limit: int) -> tuple[list[Instrument], int]:
+    """Import IDX listing directly from official XLSX or optional CSV, without changing the input."""
+    if not path.is_file():
+        raise DiscoveryError('IDX listing file not found')
+    suffix = path.suffix.lower()
+    if suffix == '.xlsx':
+        from .xlsx_rows import read_xlsx_tables, WorkbookFormatError
+        try:
+            tables = read_xlsx_tables(path)
+        except WorkbookFormatError as exc:
+            raise DiscoveryError(f'IDX XLSX could not be read: {exc}') from exc
+    elif suffix == '.csv':
+        if path.stat().st_size > 4_000_000:
+            raise DiscoveryError('IDX CSV exceeds maximum allowed 4 MB')
+        try:
+            raw = path.read_text(encoding='utf-8-sig')
+        except UnicodeError as exc:
+            raise DiscoveryError('IDX CSV must be UTF-8') from exc
+        try:
+            dialect = csv.Sniffer().sniff(raw[:4096], delimiters=',;\t')
+        except csv.Error:
+            raise DiscoveryError('IDX CSV requires comma, semicolon or tab delimiter') from None
+        tables = [list(csv.reader(io.StringIO(raw), dialect=dialect))]
+    else:
+        raise DiscoveryError('Unsupported IDX file; use .xlsx or .csv (not .xls or .xlsm)')
+    # One workbook can contain explanatory/empty tabs. Choose the tab with the
+    # highest number of valid IDX symbols, not the first arbitrary worksheet.
+    candidates = [_parse_idx_table(rows) for rows in tables]
+    pool = max(candidates, key=len, default=[])
+    if not pool:
+        raise DiscoveryError('IDX file must contain Kode and Nama Perusahaan columns with valid stock rows')
+    symbols = sorted(pool, key=lambda x: x.symbol)
+    return symbols[:limit], len(symbols)
+
+
+def discover_idx_csv(path: Path, limit: int) -> tuple[list[Instrument], int]:
+    """Backward-compatible CSV helper; new integrations should call discover_idx_file."""
+    if path.suffix.lower() != '.csv':
+        raise DiscoveryError('IDX CSV helper requires a .csv file')
+    return discover_idx_file(path, limit)
 
 
 def _read_snapshot(path: Path = SNAPSHOT_PATH) -> dict:
@@ -204,7 +250,8 @@ def _atomic_write(path: Path, payload: dict) -> None:
 
 def sync_discovery(markets: list[str], *, us_limit: int = 24,
                    crypto_limit: int = 18, idx_limit: int = 35,
-                   idx_csv: Path | None = None, path: Path = SNAPSHOT_PATH,
+                   idx_csv: Path | None = None, idx_file: Path | None = None,
+                   path: Path = SNAPSHOT_PATH,
                    client: httpx.Client | None = None) -> dict:
     """Refresh only requested markets. Preserve their last successful results on failure.
 
@@ -239,11 +286,14 @@ def sync_discovery(markets: list[str], *, us_limit: int = 24,
                     source = 'BINANCE_EXCHANGEINFO_24HR'
                     note = 'Ranked on rolling 24h quote volume; not 20-session ADV'
                 else:
-                    if idx_csv is None:
-                        raise DiscoveryError('IDX requires --idx-csv exported from official IDX listing page')
-                    found, total = discover_idx_csv(idx_csv, idx_limit)
-                    source = 'IDX_USER_IMPORTED_CSV'
-                    note = 'User-imported stock list; status depends on CSV date; does not independently verify suspensions'
+                    if idx_csv is not None and idx_file is not None:
+                        raise DiscoveryError('Choose only one IDX input file')
+                    file = idx_file or idx_csv
+                    if file is None:
+                        raise DiscoveryError('IDX requires --idx-file /path/to/official-list.xlsx (or .csv)')
+                    found, total = discover_idx_file(file, idx_limit)
+                    source = 'IDX_USER_IMPORTED_XLSX' if file.suffix.lower() == '.xlsx' else 'IDX_USER_IMPORTED_CSV'
+                    note = 'User-imported listing; board/status depends on file date; suspensions not independently verified'
                 by_market[market] = [dict(vars(x)) for x in found]
                 reports[market] = {'source': source, 'discovered': total, 'selected': len(found),
                                    'synced_at': now, 'note': note}
