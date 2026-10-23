@@ -1,3 +1,10 @@
+## 0.3.0-alpha — Swing Research Gate V2 (2026-10-23)
+- Add an explainable research-only gate: technical confirmation, historical liquidity, stop distance in ATR, structural target, and modeled net R:R.
+- 0.1% per-side friction is a labelled research assumption, never actual brokerage cost.
+- Display PASS/WAIT/BLOCKED/EXCLUDED checks in asset detail without fabricating trade readiness or win probability.
+- Preserve immutable old scans; add offline regression tests for gate semantics, look-ahead isolation and conservative cost rejection.
+- Detailed specification in docs/STRATEGY_ENGINE_V2.md.
+
 ## 0.2.2-alpha — Discovery quality & coverage (2026-10-23)
 - IDX candidate selection no longer always takes the alphabetic first 35 ticker codes. It now samples the entire imported listing using deterministic month-scoped rotation; no unverified claim of improved liquidity.
 - Distinguish INSUFFICIENT_HISTORY scan rejections from provider/data failures. The raw error list is retained for backward compatibility.

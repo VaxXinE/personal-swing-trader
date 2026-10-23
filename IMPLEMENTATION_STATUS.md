@@ -1,3 +1,8 @@
+## v0.3.0-alpha supplement (2026-10-23)
+- FR-005 research strategy validation: new pure-function gate supports technical confirmation, historical liquidity, 0.5–4 ATR stop geometry, structurally anchored target, and a 0.1%/side cost-aware 2R screen. All are **research assumptions**; no historical backtest profitability, trade readiness, or probability claims.
+- Existing signal snapshots are immutable; rerun scanner for new fields. A signal passing the research gate is still NOT cleared for execution.
+- Next P0: unbiased out-of-sample replay including corporate actions, per-market session rules, and actual fee/slippage calibration.
+
 # Implementation Status — Alpha 0.2.2
 
 **As of:** 2026-10-23. This tracks features honestly relative to `PRD.md`. Data in demo mode is fictional; trading probabilities are gated off.

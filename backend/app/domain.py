@@ -174,7 +174,8 @@ def liquidity(instrument: Instrument, bars: Sequence[Candle], f: dict, quote: Qu
     if spread is not None:
         execution='PASS' if spread<=SPREAD_LIMIT[instrument.market] else 'FAIL'
         execution_reasons=[] if execution=='PASS' else ['WIDE_SPREAD']
-    # Even if spread passes, market status and executable rules are not independently verified in v0.
+    # A wide quoted spread is evidence of risk, not execution eligibility.
+    # Even if spread passes, market status and executable rules remain unverified.
     return {'historical': 'PASS' if passed else 'FAIL','execution':'UNKNOWN',
             'reasons':reasons,'execution_reasons':execution_reasons + ['RULES_UNVERIFIED'],
             'adv20':round(f['adv_20'],2),'adv20_basis':'ACTUAL' if all(b.turnover is not None for b in bars[-21:-1]) else 'ESTIMATED_CLOSE_X_VOLUME',
@@ -248,11 +249,70 @@ def detect_strategy(ins: Instrument, bars: Sequence[Candle], f: dict, strat: str
             'research_baseline':True}
 
 
+
+def evaluate_research_gate(setup: dict, historical_liquidity: str, atr: float) -> dict:
+    """Conservative, pure EOD research screening; never certifies execution.
+
+    This gate uses only already-computed signal-bar fields. 0.1% per side is
+    an *illustrative* friction assumption, not an exchange/broker fee quote.
+    Status PASS here means research criteria passed, NEVER trade-ready.
+    """
+    entry, stop, target = setup['entry'], setup['stop'], setup['target']
+    valid_geometry = (all(isfinite(v) for v in (entry, stop, atr))
+                      and entry > stop > 0 and atr > 0)
+    stop_atr = (entry - stop) / atr if valid_geometry else None
+    # Explicit, research-only stop range; too tight risks market noise, too far
+    # creates excessive unit risk. These are NOT official exchange rules.
+    stop_range_ok = stop_atr is not None and 0.5 <= stop_atr <= 4.0
+    structural_target_ok = (valid_geometry and target is not None
+                            and isfinite(target) and target > entry)
+    gross_rr = ((target - entry) / (entry - stop)) if structural_target_ok else None
+    # Fixed proxy assumes 0.1% on both entry and exit, including slippage.
+    # Risk denominator includes the friction of a stop-out, too.
+    net_rr = None
+    if structural_target_ok:
+        gain = target - entry - 0.001 * (entry + target)
+        risk = entry - stop + 0.001 * (entry + stop)
+        net_rr = gain / risk
+    rr_ok = net_rr is not None and net_rr >= 2.0
+    technique_ok = bool(setup['criteria']) and all(c['pass'] for c in setup['criteria'])
+    liquid_ok = historical_liquidity == 'PASS'
+    checks = [
+        {'code': 'TECHNICAL_CONFIRMATION', 'pass': technique_ok},
+        {'code': 'HISTORICAL_LIQUIDITY', 'pass': liquid_ok},
+        {'code': 'VALID_ENTRY_STOP', 'pass': valid_geometry},
+        {'code': 'STOP_DISTANCE_ATR_0_5_TO_4', 'pass': stop_range_ok},
+        {'code': 'STRUCTURAL_TARGET', 'pass': structural_target_ok},
+        {'code': 'MODELED_NET_RR_AT_LEAST_2', 'pass': rr_ok},
+    ]
+    if not liquid_ok:
+        status = 'EXCLUDED'
+    elif not valid_geometry or not stop_range_ok:
+        status = 'BLOCKED'
+    elif not all(c['pass'] for c in checks):
+        status = 'WAIT'
+    else:
+        status = 'PASS'
+    return {
+        'status': status,
+        'checks': checks,
+        'reason_codes': [c['code'] for c in checks if not c['pass']],
+        'stop_atr': round(stop_atr, 3) if stop_atr is not None else None,
+        'gross_reward_risk': round(gross_rr, 3) if gross_rr is not None else None,
+        'modeled_net_reward_risk': round(net_rr, 3) if net_rr is not None else None,
+        'friction_assumption_pct_per_side': 0.1,
+        'trade_ready': False,
+        'execution_validated': False,
+        'note': 'Research gate only. Broker fees, market rules, spread, session, and fills not verified.',
+    }
+
+
 def analyze(ins: Instrument, bars: Sequence[Candle], quote: Quote | None = None) -> dict:
     f=calculate_features(bars)
     liq=liquidity(ins,bars,f,quote)
     strategies=[detect_strategy(ins,bars,f,s) for s in ('PULLBACK','BREAKOUT')]
     for s in strategies:
+        s['research_gate'] = evaluate_research_gate(s, liq['historical'], f['atr_14'])
         if liq['historical']!='PASS':
             s['status']='EXCLUDED';s['reason_codes']+=liq['reasons']
         elif s['status']=='QUALIFIED':

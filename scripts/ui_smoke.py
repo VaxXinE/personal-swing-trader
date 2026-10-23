@@ -6,11 +6,17 @@ import json
 import os
 import sys
 from pathlib import Path
+from tempfile import TemporaryDirectory
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'backend'))
 os.environ.setdefault('SWING_DATA_MODE','demo')
 os.environ.setdefault('SWING_DB_PATH','/tmp/swing_ui_smoke.db')
 from fastapi.testclient import TestClient
-from app.main import app
+from app import main
+from app.storage import Store
+# Ensure fixture uses new run schema, never cached legacy SQLite snapshots.
+fixture_dir = TemporaryDirectory(prefix="swing-ui-smoke-")
+main.store = Store(Path(fixture_dir.name) / "smoke.db")
+app = main.app
 from playwright.sync_api import sync_playwright
 ROOT=Path(__file__).resolve().parents[1]
 WEB=ROOT/'web'
@@ -36,6 +42,8 @@ with sync_playwright() as p:
         assert page.locator('[data-asset]').count()>0
         page.locator('[data-asset]').first.click()
         assert page.locator('.modal').count()==1
+        assert page.get_by_text('Swing Research Gate V2').count()==1
+        assert page.get_by_text('Execution: NOT VERIFIED.').count()==1
         assert not errors,errors
         page.locator('#close-modal').click()
         explore_nav = '.sidebar [data-page="explore"]' if width>700 else '.mobile-tabs [data-page="explore"]'

@@ -2,7 +2,9 @@
 
 **Bahasa Indonesia / Quick Start:** [START_HERE_ID.md](START_HERE_ID.md). Untuk developer, mulai dari [AGENTS.md](AGENTS.md) dan [IMPLEMENTATION_STATUS.md](IMPLEMENTATION_STATUS.md).
 
-**Version:** `0.2.1-alpha` · **Date:** 2026-10-23 · **Owner:** single developer/user · **Scope:** long-only; US + IDX equities and crypto spot.
+**Version:** `0.3.0-alpha` · **Date:** 2026-10-23 · **Owner:** single developer/user · **Scope:** long-only; US + IDX equities and crypto spot.
+
+**New in 0.3.0:** Swing Research Gate V2 adds explicit PASS/WAIT/BLOCKED/EXCLUDED criteria, ATR-based stop geometry, structural-target requirement, and *illustrative* modeled transaction costs. This is **not a trading signal** and does **not validate profitability**. See [docs/STRATEGY_ENGINE_V2.md](docs/STRATEGY_ENGINE_V2.md).
 
 > **THIS IS A WORKING ALPHA, NOT A FINISHED FORECAST PLATFORM.** The browser app and private API work in synthetic demo mode, and optional market data adapters exist. No trade execution. Quote verification, fundamentals, historical-bias-free validation, and ML probabilities are **not** production ready. All synthetic data is labelled, and all forecasts are withheld.
 

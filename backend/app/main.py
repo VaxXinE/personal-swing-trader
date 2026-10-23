@@ -18,7 +18,7 @@ from .rules import ScreenerConfig,validate_rules,RuleError
 from .service import scan,get_latest
 from .storage import Store
 
-app=FastAPI(title='Personal Swing Intelligence',version='0.2.0',docs_url='/api-docs',redoc_url=None)
+app=FastAPI(title='Personal Swing Intelligence',version='0.3.0',docs_url='/api-docs',redoc_url=None)
 store=Store(settings.db_path)
 WEB=Path(__file__).resolve().parents[2]/'web'
 app.mount('/static',StaticFiles(directory=str(WEB)),name='static')
@@ -46,13 +46,13 @@ async def private_guard(request:Request,call_next):
 def home():return FileResponse(WEB/'index.html')
 
 @app.get('/health/live')
-def live():return {'status':'ok','version':'0.2.0','mode':settings.data_mode}
+def live():return {'status':'ok','version':'0.3.0','mode':settings.data_mode}
 
 @app.get('/health/ready')
 def ready():return {'status':'ok','database':store.path.exists(),'provider_mode':settings.data_mode}
 
 @app.get('/v1/meta')
-def meta():return {'version':'0.2.0','mode':settings.data_mode,'private':True,
+def meta():return {'version':'0.3.0','mode':settings.data_mode,'private':True,
                    'forecasts':'NOT_VALIDATED','order_execution':'DISABLED',
                    'execution_checks':'UNVERIFIED', 'supported_markets':['US','IDX','CRYPTO'],
                    'source_notice':'Demo means 100% synthetic data; LIVE uses external feeds and can fail.'}
