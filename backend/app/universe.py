@@ -208,8 +208,17 @@ def discover_idx_file(path: Path, limit: int) -> tuple[list[Instrument], int]:
     pool = max(candidates, key=len, default=[])
     if not pool:
         raise DiscoveryError('IDX file must contain Kode and Nama Perusahaan columns with valid stock rows')
+    # The IDX listing is normally alphabetical; taking its first 35 rows would
+    # bias every scan toward codes beginning with A. Rotate a deterministic,
+    # reproducible *candidate sample* monthly instead. This is NOT a liquidity
+    # estimate: the 20-session turnover check still makes the final decision.
     symbols = sorted(pool, key=lambda x: x.symbol)
-    return symbols[:limit], len(symbols)
+    if len(symbols) > limit:
+        cycle = datetime.now(timezone.utc).strftime('%Y-%m')
+        symbols.sort(key=lambda x: (hashlib.sha256(
+            f'{cycle}:IDX:{x.instrument_id}'.encode('utf-8')).hexdigest(), x.symbol))
+        symbols = sorted(symbols[:limit], key=lambda x: x.symbol)
+    return symbols, len(pool)
 
 
 def discover_idx_csv(path: Path, limit: int) -> tuple[list[Instrument], int]:
@@ -293,7 +302,8 @@ def sync_discovery(markets: list[str], *, us_limit: int = 24,
                         raise DiscoveryError('IDX requires --idx-file /path/to/official-list.xlsx (or .csv)')
                     found, total = discover_idx_file(file, idx_limit)
                     source = 'IDX_USER_IMPORTED_XLSX' if file.suffix.lower() == '.xlsx' else 'IDX_USER_IMPORTED_CSV'
-                    note = 'User-imported listing; board/status depends on file date; suspensions not independently verified'
+                    note = ('User-imported listing; monthly-rotating candidate sample (not liquidity ranking); '
+                            'board/status depends on file date; suspensions not independently verified')
                 by_market[market] = [dict(vars(x)) for x in found]
                 reports[market] = {'source': source, 'discovered': total, 'selected': len(found),
                                    'synced_at': now, 'note': note}

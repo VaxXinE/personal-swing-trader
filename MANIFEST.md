@@ -1,6 +1,6 @@
 # Application Package Manifest
 
-**Version:** 0.2.1-alpha  
+**Version:** 0.2.2-alpha  
 **Date:** 2026-10-23  
 **Type:** runnable browser + FastAPI research alpha and Flutter mobile source; not a production release.
 

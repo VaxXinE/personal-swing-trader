@@ -1,4 +1,4 @@
-# Implementation Status — Alpha 0.2.1
+# Implementation Status — Alpha 0.2.2
 
 **As of:** 2026-10-23. This tracks features honestly relative to `PRD.md`. Data in demo mode is fictional; trading probabilities are gated off.
 
@@ -75,3 +75,10 @@
 - Import .xlsx or .csv for IDX using `--idx-file`, with bounded OOXML parsing and no extra pip dependency.
 - Workbook data never executes Excel formulas/macros; failures preserve the last valid discovery snapshot.
 - Verification: 41 backend tests passed in this environment (35 previous + 6 XLSX tests). No live IDX workbook was provided for integration testing.
+
+## v0.2.2 post-import audit (2026-10-23)
+
+- IDX selection no longer arbitrarily prioritizes A-prefix codes from alphabetical official exports. New sync performs repeatable calendar-month candidate rotation across the validated source listing. This is an exploration sample, **not** liquidity ranking or proof of active tradability.
+- `coverage.liquidity_passed` and `coverage.insufficient_history` count instruments, distinct from 2-per-asset strategy evaluations. Scan rejections from under 60 complete daily candles have `INSUFFICIENT_HISTORY` category; existing `errors` field retained for compatibility.
+- Data Health changes 'Provider Errors' to 'Scan Failures' and shows historical liquidity-pass counts. `README.md` explains that sync must be rerun to refresh saved local universe.
+- Tests: 43 backend passed, HTTP demo smoke passed, Node syntax passed. Actual live Yahoo/Binance feed and production exchange suitability not yet verified by this patch.

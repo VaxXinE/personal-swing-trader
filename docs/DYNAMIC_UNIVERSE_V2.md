@@ -59,3 +59,9 @@ The importer reads `.xlsx` using a constrained OOXML parser with no runtime spre
 Accepted headers include `Kode`, `Kode Saham`, `Nama Perusahaan`, `Nama Emiten`, and optionally `Papan Pencatatan`. Valid listed codes must be exactly four A-Z letters. The user-exported sheet is not an authoritative live suspension feed. A malformed/oversized Excel file fails closed and does not replace the previous successful discovery snapshot. An eight-megabyte compressed size and 36-megabyte inflated XML limit reduce zip-bomb risk. `.xls` and `.xlsm` are deliberately not accepted.
 
 IDX discovery remains capped at 75 new candidates per sync. A successful import does not imply Yahoo Finance daily OHLCV is available for every ticker; check Data Health after Run Scan.
+
+## IDX selection and scan coverage (0.2.2-alpha)
+
+The official IDX listing is sorted by code, not liquidity. Earlier builds sampled the first 35 ticker rows (mostly A-prefixed stocks). New imports sample from across the valid listing using a deterministic SHA-256 order that is stable within each UTC calendar month. Samples are not liquidity-ranked or guaranteed to pass the historical liquidity gate. The baseline instruments remain in the merged registry. To see a new IDX sample, run the `--markets IDX --idx-file ...` sync command again; an ordinary `git pull` does not mutate local universe data.
+
+The `/v1/opportunities` `coverage` now includes `liquidity_passed` and `insufficient_history` per market. An instrument lacking 60 completed candles is a rejected research input (`category: INSUFFICIENT_HISTORY`), not necessarily an HTTP/provider outage. Every attempt is counted once per asset even though each analyzed asset may produce multiple strategy evaluations. `liquidity_passed` is historical only and does not mean an order is executable.

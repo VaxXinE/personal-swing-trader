@@ -1,6 +1,6 @@
 {
   "project": "Personal Swing Intelligence",
-  "version": "0.2.1-alpha",
+  "version": "0.2.2-alpha",
   "date": "2026-10-23",
   "type": "Runnable FastAPI + browser research alpha, Flutter source, optional unverified GitHub Android build",
   "warnings": [
@@ -38,18 +38,18 @@
     },
     {
       "path": "CHANGELOG.md",
-      "bytes": 2943,
-      "sha256": "09e887617de5c84e062c5c022fcdee0d1bdfeebe2378e31cc747732c34562a2c"
+      "bytes": 3677,
+      "sha256": "e2af459b3d319f07128f649d9b0819806e9601433d20a504a5251d6418bff784"
     },
     {
       "path": "IMPLEMENTATION_STATUS.md",
-      "bytes": 8381,
-      "sha256": "d41b36633e6ce371a9a915d2593e93261664303ca056560fdf5d169547738440"
+      "bytes": 9342,
+      "sha256": "09277485120fa51dc9e19f2db7c7db86027f360a1e155bdab698278246846c29"
     },
     {
       "path": "MANIFEST.md",
       "bytes": 1476,
-      "sha256": "7b0779884ecd6e3e8221e8033bb77008bb49931859ae7f23a5d99cadaafabceb"
+      "sha256": "36f7a43965827a47ef923585eb67d36669208cdb5da3876b4d1551141713d7b5"
     },
     {
       "path": "PRD.md",
@@ -58,8 +58,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 11058,
-      "sha256": "65e4edcf1d7cf847c77a525e91a8c0267e69d5efd9a0997615d0ca017e8728d1"
+      "bytes": 11615,
+      "sha256": "ab646019cb37b0afd3b2a3b76ab26e1d6a5bcada795a662f078b861d5849a01f"
     },
     {
       "path": "START_HERE_ID.md",
@@ -133,8 +133,8 @@
     },
     {
       "path": "backend/app/service.py",
-      "bytes": 4866,
-      "sha256": "f723b2c44421114330665c8054e4f44c611df1bd2edd7e40b6b7ae455bb2f3ac"
+      "bytes": 5470,
+      "sha256": "6cac573471ef4a3179779429ffb7e035e8ce95faea0b933e0bc350f9ca508b31"
     },
     {
       "path": "backend/app/storage.py",
@@ -143,8 +143,8 @@
     },
     {
       "path": "backend/app/universe.py",
-      "bytes": 15703,
-      "sha256": "d6c53c70cbdaeae22d07eb3de6d2bd89cc79b9c7edc1d18ddd640d2e9250a918"
+      "bytes": 16391,
+      "sha256": "34fd0b5cc57a590b4a1e2d6dfb1e45bf9afe9bf20b4d4ef2464033340f766731"
     },
     {
       "path": "backend/app/xlsx_rows.py",
@@ -188,8 +188,8 @@
     },
     {
       "path": "backend/tests/test_dynamic_universe.py",
-      "bytes": 7254,
-      "sha256": "b2f44aa76af24df46ad2a767039ef0c6879d5caf8ad3d0f1d0f8fc1ad3c927fb"
+      "bytes": 9229,
+      "sha256": "6038ebffb5661c38b0a7712e8904a88ed9ff82009751c84c6beab95f5efeb558"
     },
     {
       "path": "backend/tests/test_idx_xlsx.py",
@@ -263,8 +263,8 @@
     },
     {
       "path": "docs/DYNAMIC_UNIVERSE_V2.md",
-      "bytes": 7053,
-      "sha256": "9e1570ca36a296b0296bb762dc9409df08c1f94bc0bd1b4347b13773e33cdbc5"
+      "bytes": 8108,
+      "sha256": "8e7e452c710dc55178a6e7bb5114f9f6b56ccf60935edbe79533abdafda1cf01"
     },
     {
       "path": "docs/EXPLANATION_POLICY.md",
@@ -423,8 +423,8 @@
     },
     {
       "path": "web/app.js",
-      "bytes": 32762,
-      "sha256": "80f0ed8a260ee14d14ef11abd1e56a9cd56e6eb95c1998c4bb44a3843081d0a0"
+      "bytes": 33045,
+      "sha256": "4cd8c9cc9ad90b5a23bd50a0f415c60fcb54523fb9ec06e5d19746bd3b053044"
     },
     {
       "path": "web/icon-192.png",

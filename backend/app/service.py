@@ -17,7 +17,11 @@ def scan(store:Store,mode:str,config:ScreenerConfig)->dict:
         try:
             bars,quote,source,data_status=load_bars(ins,mode)
             validate_candles(bars)
-            if len(bars)<60:raise ProviderError('Less than 60 valid daily candles')
+            if len(bars)<60:
+                errors.append({'instrument_id':ins.instrument_id,
+                               'error':'Less than 60 valid daily candles',
+                               'category':'INSUFFICIENT_HISTORY'})
+                continue
             analysis=analyze(ins,bars,quote)
             analyzed_by_market[ins.market].add(ins.instrument_id)
             analysis['source']=source
@@ -49,16 +53,28 @@ def scan(store:Store,mode:str,config:ScreenerConfig)->dict:
                 items.append({**{k:v for k,v in analysis.items() if k!='strategies'},'setup':s,
                               'filter_status':'MATCH','scan_generated_at':utcnow()})
         except (ValueError,ProviderError) as exc:
-            errors.append({'instrument_id':ins.instrument_id,'error':str(exc)[:240]})
+            errors.append({'instrument_id':ins.instrument_id,'error':str(exc)[:240],
+                           'category':'DATA_OR_PROVIDER_ERROR'})
         except Exception as exc:
-            errors.append({'instrument_id':ins.instrument_id,'error':f'Unexpected {type(exc).__name__} — see backend logs'})
+            errors.append({'instrument_id':ins.instrument_id,
+                           'error':f'Unexpected {type(exc).__name__} — see backend logs',
+                           'category':'DATA_OR_PROVIDER_ERROR'})
     # Stable market-relative sorting; score never claimed calibrated across markets.
     items.sort(key=lambda r:(r['market'],-r['setup']['score'],r['symbol'],r['setup']['strategy']))
     attempted = {m:sum(i.market == m for i in registry) for m in ('US','IDX','CRYPTO')}
     successful = {m:len(analyzed_by_market[m]) for m in attempted}
     rejected = {m:sum(x['market']==m for x in excluded) for m in attempted}
-    failures = {m:sum(i.instrument_id in {e['instrument_id'] for e in errors} for i in registry if i.market==m) for m in attempted}
-    coverage = {m:{'attempted':attempted[m], 'analyzed':successful[m], 'excluded':rejected[m], 'errors':failures[m]} for m in attempted}
+    errors_by_market = {m:[e for e in errors if e['instrument_id'] in {
+        i.instrument_id for i in registry if i.market == m}] for m in attempted}
+    coverage = {m:{
+        'attempted':attempted[m],
+        'analyzed':successful[m],
+        'excluded':rejected[m],
+        'liquidity_passed':successful[m]-rejected[m],
+        'errors':len(errors_by_market[m]),
+        'insufficient_history':sum(e.get('category')=='INSUFFICIENT_HISTORY'
+                                   for e in errors_by_market[m]),
+    } for m in attempted}
     result={'generated_at':utcnow(),'data_mode':mode,'config':config.model_dump(), 'count':len(items),
             'items':items,'exclusions':excluded,'errors':errors,
             'analysis_notice':'Research baseline; score is not probability. Execution eligibility unverified. No investment advice.',

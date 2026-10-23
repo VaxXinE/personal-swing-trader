@@ -136,3 +136,44 @@ def test_api_reports_discovery_and_coverage(tmp_path,monkeypatch):
     opp=c.get('/v1/opportunities').json()
     assert opp['coverage']['US']['attempted']>=1
     assert opp['coverage']['US']['analyzed']>=1
+
+
+def test_idx_large_listing_rotates_candidates_instead_of_first_alphabetical(tmp_path):
+    listing = tmp_path / 'idx.csv'
+    codes = [f'{chr(65+i//20)}{chr(65+i%20)}AA' for i in range(60)]
+    listing.write_text('Kode,Nama Perusahaan\n' + ''.join(
+        f'{code},Perusahaan {code}\n' for code in codes), encoding='utf-8')
+    a, total_a = universe.discover_idx_file(listing, 15)
+    b, total_b = universe.discover_idx_file(listing, 15)
+    selected = [x.symbol for x in a]
+    assert total_a == total_b == 60
+    assert selected == [x.symbol for x in b]  # stable within the same month
+    assert selected != codes[:15]  # not the spreadsheet's alphabetic first rows
+    assert len(set(selected)) == 15
+    assert any(x[0] != 'A' for x in selected)
+
+
+def test_scan_counts_history_gaps_separately_from_provider_failures(tmp_path, monkeypatch):
+    from app.providers import demo_bars
+    us = universe._instrument('US', 'TEST', 'Test Company', 'NASDAQ')
+    idx = universe._instrument('IDX', 'GOOD', 'Good Company', 'IDX', 'GOOD.JK')
+    monkeypatch.setattr(service, 'get_instruments', lambda mode: (us, idx))
+
+    def data(ins, mode):
+        bars = demo_bars(ins)
+        if ins.market == 'US':
+            bars = bars[:59]
+        return bars, None, 'TEST_FIXTURE', 'DEMO'
+
+    monkeypatch.setattr(service, 'load_bars', data)
+    store = Store(tmp_path / 'audit.db')
+    result = service.scan(store, 'demo', ScreenerConfig(name='Audit'))
+    assert len(result['errors']) == 1
+    assert result['errors'][0]['category'] == 'INSUFFICIENT_HISTORY'
+    us_cov = result['coverage']['US']
+    assert us_cov == {'attempted': 1, 'analyzed': 0, 'excluded': 0,
+                      'liquidity_passed': 0, 'errors': 1, 'insufficient_history': 1}
+    idx_cov = result['coverage']['IDX']
+    assert idx_cov['attempted'] == idx_cov['analyzed'] == 1
+    assert idx_cov['liquidity_passed'] + idx_cov['excluded'] == idx_cov['analyzed']
+    assert idx_cov['insufficient_history'] == 0

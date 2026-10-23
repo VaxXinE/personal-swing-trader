@@ -142,3 +142,7 @@ Docker option (advanced): `SWING_API_TOKEN=<random-32+-chars> docker compose -f 
 **Not yet delivered:** automatic full-market US/IDX discovery & comprehensive coverage, licensed exchange-level realtime streaming, independently verified trade-readiness, complete exchange listings/IDX rule timeline, corporate-action safe backtests across delisted universe, institutional-grade data QC, validated prediction ML and probability intervals, full mobile custom rule nesting, push notifications, scheduled jobs by market calendar, native APK, successful Flutter/Android CI run.
 
 The original PRD is the **target specification**, not a claim that all 30 tasks or requirements are completed. See [IMPLEMENTATION_STATUS.md](IMPLEMENTATION_STATUS.md) and [docs/TASKS.md](docs/TASKS.md) for remaining work.
+
+### Post-import quality check (v0.2.2-alpha)
+
+IDX `.xlsx` imports no longer always take the alphabetically earliest symbols; with a cap smaller than the listing, a month-stable deterministic rotated candidate sample is selected. To refresh the IDX sample, rerun `python scripts/sync_universe.py --markets IDX --idx-file "$HOME/Downloads/<actual-filename>.xlsx" --idx-limit 35` and click Run Scan. The Data Health screen distinguishes missing history, data/provider errors, and liquidity exclusions; historical liquidity passing is **not** trade readiness.

@@ -1,3 +1,9 @@
+## 0.2.2-alpha — Discovery quality & coverage (2026-10-23)
+- IDX candidate selection no longer always takes the alphabetic first 35 ticker codes. It now samples the entire imported listing using deterministic month-scoped rotation; no unverified claim of improved liquidity.
+- Distinguish INSUFFICIENT_HISTORY scan rejections from provider/data failures. The raw error list is retained for backward compatibility.
+- Per-market coverage exposes liquidity_passed and insufficient_history counts; dashboard now distinguishes attempted assets, analyzed assets, and strategy evaluations, and links to the XLSX importer.
+- Existing saved scans and universe snapshots remain unchanged until the user explicitly syncs and runs a new scan.
+
 # Changelog
 
 ## 0.2.1-alpha (2026-10-23)
