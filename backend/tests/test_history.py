@@ -100,8 +100,13 @@ def test_corporate_action_evidence_is_immutable_and_never_changes_prices(tmp_pat
     assert store.record_action(ins,event,source='YFINANCE_RESEARCH_RAW')['status']=='UNCHANGED'
     clock.at=datetime(2025,2,2,tzinfo=timezone.utc)
     assert store.record_action(ins,replace(event,value='3'),source='YFINANCE_RESEARCH_RAW')['revision']==2
-    assert len(store.actions(ins.instrument_id,source='YFINANCE_RESEARCH_RAW'))==2
-    assert len(store.actions(ins.instrument_id,source='YFINANCE_RESEARCH_RAW',as_of='2025-02-01T01:00:00Z'))==1
+    latest=store.actions(ins.instrument_id,source='YFINANCE_RESEARCH_RAW')
+    prior=store.actions(ins.instrument_id,source='YFINANCE_RESEARCH_RAW',as_of='2025-02-01T01:00:00Z')
+    assert len(latest)==len(prior)==1
+    assert latest[0]['revision']==2 and prior[0]['revision']==1
+    # As-of selects one version; corrections remain in the append-only audit table.
+    with sqlite3.connect(store.path) as db:
+        assert db.execute('SELECT COUNT(*) FROM history_actions').fetchone()[0]==2
     assert store.read(ins.instrument_id,source='YFINANCE_RESEARCH_RAW',price_basis='VENDOR_UNVERIFIED')['candles'][0]['candle']['close']==102
 
 
