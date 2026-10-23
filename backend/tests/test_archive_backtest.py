@@ -23,10 +23,18 @@ class Clock:
 
 def make_bars(n=230):
     start = datetime(2025, 1, 1, tzinfo=timezone.utc)
+    # Equity fixtures use weekdays. Weekends are not ordinary US sessions.
+    # These are still SYNTHETIC; official holidays are NOT certified here.
+    sessions = []
+    current = start
+    while len(sessions) < n:
+        if current.weekday() < 5:
+            sessions.append(current)
+        current += timedelta(days=1)
     return [
-        Candle((start + timedelta(days=i)).isoformat().replace('+00:00', 'Z'),
+        Candle(session.isoformat().replace('+00:00', 'Z'),
                100.0, 105.0, 95.0, 101.0, 250000.0)
-        for i in range(n)
+        for session in sessions
     ]
 
 

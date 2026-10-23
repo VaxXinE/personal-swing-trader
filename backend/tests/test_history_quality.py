@@ -88,7 +88,7 @@ def test_calendar_validation_rejects_duplicate_weekend_oversize_and_wrong_market
     write_calendar(p, dates, sessions=['2025-01-02','2025-01-02'])
     with pytest.raises(HistoryError,match='sorted, unique'):
         load_session_calendar(p,'US')
-    write_calendar(p,dates,sessions=['2025-01-02','2025-01-04'])
+    write_calendar(p,dates,coverage_end='2025-01-04',sessions=['2025-01-02','2025-01-04'])
     with pytest.raises(HistoryError,match='Weekend'):
         load_session_calendar(p,'US')
     write_calendar(p,dates,market='IDX')
