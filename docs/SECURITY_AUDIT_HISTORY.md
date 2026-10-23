@@ -27,3 +27,8 @@
 ## Next forensic action for original macOS alert
 
 Do **not** repeatedly run LIVE scan to reproduce XProtect warning. Determine the original blocked script or executable's **path, quarantine provenance, timestamp and signed process** from authoritative macOS security evidence; preserve logs and avoid disabling OS protections. If no path is visible, use trusted macOS security support/incident response. This repository audit cannot attribute causation, and it would be unsound to patch `yfinance`/Roo Code based on coincidence alone.
+
+
+### Date-range history capture
+
+Added `backend/app/history_sources.py` as an explicit adapter isolated from Run Scan. It uses **registry-allowlisted symbols**, a fixed Binance `HTTPS` hostname, `follow_redirects=False`, a bounded 2,500-bar/10-year window and excludes non-final candles. The equity range adapter calls yfinance (third-party code, so not proven safe by source inspection). Mock contract tests never access the network. No XProtect alert was reproduced or bypassed during development.

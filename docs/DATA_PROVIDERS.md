@@ -57,3 +57,8 @@ Pilot 10–20 instruments per market; compare at least several known corporate a
 - [Alpaca data feed overview](https://alpaca.markets/support/data-provider-alpaca)
 - [IDX hours and trading mechanics](https://www.idx.id/id/produk-layanan/jam-dan-mekanisme-perdagangan/)
 - [Binance Spot API docs](https://github.com/binance/binance-spot-api-docs)
+
+
+## Bounded date-range history adapter (2026-10-23)
+
+`backend/app/history_sources.py` adds explicit calendar start/end to vendor research capture. Equities: yfinance daily session-date index and conservative EOD finality guard, no fictitious historical availability. Crypto: fixed `https://data-api.binance.vision` origin, redirect suppression, spot symbol check, max four pages and 2500 bars. This does **not** replace the existing Run Scan adapter, guarantee market-data licensing, or certify raw corporate-action prices. See [HISTORICAL_DATA_ENGINE](HISTORICAL_DATA_ENGINE.md).

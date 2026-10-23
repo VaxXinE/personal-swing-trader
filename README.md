@@ -177,3 +177,5 @@ PYTHONPATH=backend python -m pytest -q backend/tests/test_history.py
 ```
 
 Live provider capture requires a separate explicit `--mode live --allow-live` opt-in and must **not** be run on a machine still showing a macOS *Malicious Script Blocked* warning. Read [Historical Data Engine](docs/HISTORICAL_DATA_ENGINE.md) and [security review](docs/SECURITY_AUDIT_HISTORY.md). This first-observed archive does **not** certify historical point-in-time availability or realistic split-adjusted/raw fills.
+
+For explicitly requested historical date ranges (ONLY after Mac security warning is resolved), see `scripts/history_ingest.py --help` and `docs/HISTORICAL_DATA_ENGINE.md`. The provider request remains capped at 2,500 candles per ingest with unverified adjustment basis.

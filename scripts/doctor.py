@@ -26,7 +26,7 @@ def main() -> int:
     dependencies = ('fastapi', 'uvicorn', 'pydantic', 'httpx')
     missing = [pkg for pkg in dependencies if importlib.util.find_spec(pkg) is None]
     checks.append(check('Backend dependencies', not missing,
-                        'installed' if not missing else 'missing: ' + ', '.join(missing) + ' (run scripts/start.sh or start.bat)'))
+                        'installed' if not missing else 'missing: ' + ', '.join(missing) + ' (install backend/requirements.txt explicitly before startup)'))
     path = ROOT / 'config/universe.json'
     try:
         instruments = json.loads(path.read_text(encoding='utf-8'))['instruments']

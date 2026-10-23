@@ -6,6 +6,7 @@ No subprocess, shell execution, URL input, dependency install, or file downloads
 from __future__ import annotations
 
 import argparse
+from datetime import date, datetime, timezone
 import sys
 from pathlib import Path
 
@@ -15,6 +16,7 @@ sys.path.insert(0, str(ROOT / 'backend'))
 from app.config import settings
 from app.history import HistoryStore, HistoryError
 from app.providers import ProviderError, load_bars
+from app.history_sources import fetch_historical_range
 from app.registry import get_instruments
 
 
@@ -24,6 +26,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument('--allow-live', action='store_true', help='Explicit consent to call public provider APIs')
     parser.add_argument('--instrument-id', help='Exact instrument ID from existing allowlisted registry')
     parser.add_argument('--limit', type=int, default=3, help='Max number of instruments (1..19 demo or 1..25 live)')
+    parser.add_argument('--start-date', help='Optional inclusive YYYY-MM-DD research start')
+    parser.add_argument('--end-date', help='Optional inclusive YYYY-MM-DD research end')
     parser.add_argument('--db', type=Path, default=settings.db_path.parent / 'history.sqlite')
     args = parser.parse_args(argv)
 
@@ -34,6 +38,16 @@ def main(argv: list[str] | None = None) -> int:
     max_limit = 25 if args.mode == 'live' else 19
     if not 1 <= args.limit <= max_limit:
         parser.error(f'--limit must be 1..{max_limit}')
+    if bool(args.start_date) != bool(args.end_date):
+        parser.error('--start-date and --end-date must be provided together')
+    start = end = None
+    if args.start_date:
+        try:
+            start, end = date.fromisoformat(args.start_date), date.fromisoformat(args.end_date)
+        except ValueError:
+            parser.error('Dates must be valid ISO YYYY-MM-DD')
+        if end < start or end > datetime.now(timezone.utc).date():
+            parser.error('Date window is reversed or future-dated')
     instruments = list(get_instruments(args.mode))
     if args.instrument_id:
         instruments = [i for i in instruments if i.instrument_id == args.instrument_id]
@@ -47,7 +61,13 @@ def main(argv: list[str] | None = None) -> int:
     any_errors = False
     for ins in instruments:
         try:
-            bars, _quote, source, _data_status = load_bars(ins, args.mode)
+            if args.mode == 'live' and start is not None:
+                bars, source = fetch_historical_range(ins,start,end)
+            else:
+                bars, _quote, source, _data_status = load_bars(ins, args.mode)
+                if args.mode == 'demo' and start is not None:
+                    from app.history import _session
+                    bars = [b for b in bars if start <= date.fromisoformat(_session(ins.market,b.at)) <= end]
             basis = 'SYNTHETIC' if args.mode == 'demo' else 'VENDOR_UNVERIFIED'
             result = archive.ingest(ins, bars, source=source, price_basis=basis,
                                     metadata={'capture_mode':args.mode, 'timeframe':'1d',

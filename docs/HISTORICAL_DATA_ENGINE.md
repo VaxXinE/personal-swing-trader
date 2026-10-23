@@ -36,7 +36,7 @@ After independently resolving the macOS alert and confirming installed dependenc
 python scripts/history_ingest.py --mode live --allow-live --instrument-id US:NASDAQ:MSFT
 ```
 
-- Does **not** execute a shell or install packages; it invokes existing `load_bars` (Yahoo equity `period=2y` or Binance 350 daily bars). This phase **does not implement multi-year provider pagination** beyond those existing limits.
+- Does **not** execute a shell or install packages. With no explicit date range it uses existing `load_bars` (Yahoo equity `period=2y` or Binance 350 daily bars). With both `--start-date` and `--end-date`, the bounded `history_sources` adapter fetches daily equities using an inclusive date window and Binance spot klines with bounded pagination, **at most 2,500 candles per ingest**. Larger windows must be split manually; a full year-over-year verified snapshot is not yet available.
 - Outbound provider/network calls can execute third-party Python/native code indirectly. No remote scan has been executed on the user's Mac by this change. The earlier macOS **Malicious Script Blocked** cause remains unknown. **Do not run this LIVE command while that warning remains unresolved.** Never disable Gatekeeper/XProtect to force completion.
 - Any failed provider or validation is reported as an error; **no silent switch** to synthetic prices.
 
@@ -61,3 +61,12 @@ python scripts/history_ingest.py --mode live --allow-live --instrument-id US:NAS
 `PYTHONPATH=backend python -m pytest -q backend/tests/test_history.py`
 
 Tests check atomicity, timestamp provenance, revisions/idempotency, conflict rejection, provider/basis spoofing, corporate-event evidence, checksum tampering, old API guard, offline demo capture and LIVE opt-in. CI also runs the full existing backend suite. No LIVE scanner or untrusted AppleScript is run during tests.
+
+
+### Optional bounded date-range backfill (LIVE opt-in only, after macOS security issue is resolved)
+
+```sh
+python scripts/history_ingest.py --mode live --allow-live --instrument-id US:NASDAQ:MSFT --start-date 2023-01-01 --end-date 2025-12-31
+```
+
+Dates are inclusive, must be valid `YYYY-MM-DD`, no future dates, and windows must be at most ten years; the 2,500-bar archive limit still applies. The equity adapter requests a fixed Yahoo symbol from the registry; the crypto adapter uses a fixed Binance origin, `follow_redirects=False`, spot-market checks, max four 1,000-row pages, and a fail-closed final-candle guard. A chosen historical window **does not prove price-basis/adjustment correctness, historical release time, or official session calendar completeness**. Mock-only contract tests confirm date-window rejection, provider origin allowlist, and final-candle filtering.

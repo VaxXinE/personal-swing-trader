@@ -1,3 +1,8 @@
+## 2026-10-23 — Bounded historical source windows
+
+- Add opt-in start/end calendar capture to the Historical Data Engine, with fail-closed Yahoo EOD finality and fixed-origin Binance spot pagination.
+- Enforce window limits and no arbitrary external URLs or redirect-following. Add isolated/mock adapter tests; normal Run Scan remains unchanged.
+
 ## 2026-10-23 — Historical Data Engine v1 (research-only)
 
 - Add SQLite append-only historical candle batches, corrections/revisions, provider price-basis separation, source manifest and integrity checks, as-of-first-observed snapshots.
