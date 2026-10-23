@@ -172,11 +172,11 @@ class _ShellState extends State<Shell> {
       '${x['symbol']} ${x['name']}'.toLowerCase().contains(search.text.toLowerCase())).toList();
     return [const SizedBox(height: 8), const Text('Opportunity Explorer',style:TextStyle(fontSize:26,fontWeight:FontWeight.bold)),
       const SizedBox(height: 10),
-      DropdownButtonFormField<String>(value:market,decoration:const InputDecoration(labelText:'Market'),
+      DropdownButtonFormField<String>(initialValue:market,decoration:const InputDecoration(labelText:'Market'),
         items:['ALL','US','IDX','CRYPTO'].map((x)=>DropdownMenuItem(value:x,child:Text(x))).toList(),
         onChanged:(x)=>setState(()=>market=x??'ALL')),
       const SizedBox(height:8),
-      DropdownButtonFormField<String>(value:strategy,decoration:const InputDecoration(labelText:'Strategy'),
+      DropdownButtonFormField<String>(initialValue:strategy,decoration:const InputDecoration(labelText:'Strategy'),
         items:['BOTH','PULLBACK','BREAKOUT'].map((x)=>DropdownMenuItem(value:x,child:Text(x))).toList(),
         onChanged:(x)=>setState(()=>strategy=x??'BOTH')),
       const SizedBox(height:8), TextField(controller:search,onChanged:(_)=>setState((){}),decoration:const InputDecoration(labelText:'Search symbol',prefixIcon:Icon(Icons.search))),
@@ -333,15 +333,15 @@ class _BuilderPageState extends State<BuilderPage> {
       const Text('Rule Builder',style:TextStyle(fontSize:25,fontWeight:FontWeight.bold)),
       const Text('Typed AND/OR conditions. Nested groups available through private API.',style:TextStyle(fontSize:11,color:secondary)),
       TextField(controller:name,decoration:const InputDecoration(labelText:'Screener name')),
-      const SizedBox(height:12),DropdownButtonFormField(value:strategy,decoration:const InputDecoration(labelText:'Strategy'),
+      const SizedBox(height:12),DropdownButtonFormField(initialValue:strategy,decoration:const InputDecoration(labelText:'Strategy'),
         items:['PULLBACK','BREAKOUT','BOTH'].map((x)=>DropdownMenuItem(value:x,child:Text(x))).toList(),onChanged:(x)=>setState(()=>strategy=x??'PULLBACK')),
-      const SizedBox(height:12),DropdownButtonFormField(value:join,decoration:const InputDecoration(labelText:'Combine conditions'),
+      const SizedBox(height:12),DropdownButtonFormField(initialValue:join,decoration:const InputDecoration(labelText:'Combine conditions'),
         items:['AND','OR'].map((x)=>DropdownMenuItem(value:x,child:Text(x))).toList(),onChanged:(x)=>setState(()=>join=x??'AND')),
       const SizedBox(height:12),...List.generate(conditions.length,(i){final c=conditions[i];return Card(child:Padding(padding:const EdgeInsets.all(10),child:Column(children:[
         Row(children:[Expanded(child:DropdownButton<String>(value:c['field'] as String,isExpanded:true,
           items:fields.map((x)=>DropdownMenuItem(value:x,child:Text(x))).toList(),onChanged:(v)=>setState(()=>c['field']=v))),
           const SizedBox(width:8),IconButton(onPressed:()=>setState(()=>conditions.removeAt(i)),icon:const Icon(Icons.delete_outline))]),
-        DropdownButtonFormField<String>(value:c['operator'] as String,items:['GT','GTE','LT','LTE','EQ','BETWEEN','GT_FIELD','LT_FIELD']
+        DropdownButtonFormField<String>(initialValue:c['operator'] as String,items:['GT','GTE','LT','LTE','EQ','BETWEEN','GT_FIELD','LT_FIELD']
           .map((x)=>DropdownMenuItem(value:x,child:Text(x))).toList(),onChanged:(v)=>setState(()=>c['operator']=v)),
         TextFormField(initialValue:c['value'].toString(),onChanged:(v)=>c['value']=v,decoration:const InputDecoration(labelText:'Value, field, or min,max')),
       ])));
@@ -417,7 +417,7 @@ class _TradeDialogState extends State<_TradeDialog> {
 
   @override Widget build(BuildContext context) => AlertDialog(
     title:const Text('Record paper trade'),content:SingleChildScrollView(child:Column(mainAxisSize:MainAxisSize.min,children:[
-      DropdownButtonFormField<String>(value:id,isExpanded:true,items:{for (final o in widget.opportunities) o['instrument_id'].toString(): o['symbol'].toString()}
+      DropdownButtonFormField<String>(initialValue:id,isExpanded:true,items:{for (final o in widget.opportunities) o['instrument_id'].toString(): o['symbol'].toString()}
         .entries.map((e)=>DropdownMenuItem(value:e.key,child:Text(e.value))).toList(),onChanged:(v)=>setState(()=>id=v??id)),
       TextField(controller:entry,keyboardType:TextInputType.number,decoration:const InputDecoration(labelText:'Entry price')),
       TextField(controller:qty,keyboardType:TextInputType.number,decoration:const InputDecoration(labelText:'Quantity')),
