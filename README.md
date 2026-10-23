@@ -148,3 +148,11 @@ The original PRD is the **target specification**, not a claim that all 30 tasks 
 ### Post-import quality check (v0.2.2-alpha)
 
 IDX `.xlsx` imports no longer always take the alphabetically earliest symbols; with a cap smaller than the listing, a month-stable deterministic rotated candidate sample is selected. To refresh the IDX sample, rerun `python scripts/sync_universe.py --markets IDX --idx-file "$HOME/Downloads/<actual-filename>.xlsx" --idx-limit 35` and click Run Scan. The Data Health screen distinguishes missing history, data/provider errors, and liquidity exclusions; historical liquidity passing is **not** trade readiness.
+
+## Local browser security / PWA cache (0.3.1 maintenance)
+
+On `localhost`, `127.0.0.1`, and `::1`, the app does **not** register its PWA service worker. It unregisters an older `'/static/sw.js'` worker belonging to this origin (if present) and clears only `swing-static-*` app caches. Other site workers/caches are left alone. For a trusted HTTPS non-local origin, the PWA registration remains available. HTTP LAN/public origins do not register the worker.
+
+This browser-cache change is **not** proof that a malware warning was a false positive and does not replace OS/browser security checks. If a warning recurs, do not bypass it; inspect the browser alert's source, extensions, requested URL and browser/OS security logs. An API response only confirms backend availability, not device integrity.
+
+Run `node scripts/pwa_smoke.cjs` for isolated PWA policy checks, and `node --check web/app.js` / `node --check web/pwa.js` for syntax.
