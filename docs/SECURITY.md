@@ -48,3 +48,8 @@ Threat model reviewed for new network/integration features, automated secret sca
 ## 6. Compliance boundary
 
 Current scope personal research, no public market-data redistribution or sale of advice. Still respect data provider terms, account access permissions, privacy, and applicable law. Expanding to public app or execution requires **new security/legal architecture review**, not a small switch.
+
+
+## Historical capture boundary (2026-10-23)
+
+Research history is archived append-only in `history.sqlite` with per-row SHA-256, bounded ingestion and first-observed timestamps. Both equity and crypto LIVE backfills are labeled `VENDOR_UNVERIFIED` for price basis; raw/adjusted/executable claims remain off. Capture is a separate CLI action, never automatically triggered by a GET endpoint or normal startup. See [Historical Data Engine](HISTORICAL_DATA_ENGINE.md) and [macOS/source audit](SECURITY_AUDIT_HISTORY.md). The macOS malware popup remains under investigation.

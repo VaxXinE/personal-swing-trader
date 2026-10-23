@@ -1,3 +1,10 @@
+## 2026-10-23 — Historical Data Engine v1 (research-only)
+
+- Add SQLite append-only historical candle batches, corrections/revisions, provider price-basis separation, source manifest and integrity checks, as-of-first-observed snapshots.
+- Add immutable corporate-action evidence, gap/split-suspect flags, a read-only authenticated API and offline-default explicit ingestion CLI with bounded LIVE opt-in.
+- Add offline security and data-integrity contract tests, without changing scanner behavior, forecast/trading permissions, or allowing arbitrary provider URLs.
+- Document why this archive is not yet a corporate-action-verified, survivorship-free, historically point-in-time feed; XProtect alert remains unresolved.
+
 ## 0.3.0-alpha — Swing Research Gate V2 (2026-10-23)
 - Add an explainable research-only gate: technical confirmation, historical liquidity, stop distance in ATR, structural target, and modeled net R:R.
 - 0.1% per-side friction is a labelled research assumption, never actual brokerage cost.

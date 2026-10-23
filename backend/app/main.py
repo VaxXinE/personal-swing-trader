@@ -9,6 +9,7 @@ from fastapi.responses import FileResponse,JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel,Field
 from .config import settings
+from .history_api import router as history_router
 from .domain import position_size
 from .registry import get_instruments
 from .universe import snapshot_metadata
@@ -19,6 +20,7 @@ from .service import scan,get_latest
 from .storage import Store
 
 app=FastAPI(title='Personal Swing Intelligence',version='0.3.0',docs_url='/api-docs',redoc_url=None)
+app.include_router(history_router)
 store=Store(settings.db_path)
 WEB=Path(__file__).resolve().parents[2]/'web'
 app.mount('/static',StaticFiles(directory=str(WEB)),name='static')

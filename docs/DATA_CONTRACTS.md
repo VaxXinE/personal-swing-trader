@@ -81,3 +81,8 @@ Parquet suggested layout `data/market/<provider>/<asset_type>/<timeframe>/year=Y
 - Crypto interim kline (`x=false`) cannot trigger daily signal.
 - US Thanksgiving/half-day and IDX holiday do not generate false gap repair.
 - Provider correction increments revision, old signal still reproducible from its snapshot.
+
+
+## Implementation mapping (2026-10-23)
+
+Historical Data Engine v1 now implements the **observation archive** subset in `backend/app/history.py` (see [HISTORICAL_DATA_ENGINE](HISTORICAL_DATA_ENGINE.md)). Original provider and adjustment-time facts that predate the first archive observation **remain unknown**; the new API never returns them as certified. The full contract above (exchange calendars, corrected raw/adjusted series, source-time point-in-time facts, delisted historical universe and snapshot calibration) is still incomplete, and the archive must not be used to assert a validated OOS strategy.

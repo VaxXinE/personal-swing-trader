@@ -165,3 +165,15 @@ Startup scripts `scripts/start.sh` and `scripts/start.bat` **never run pip insta
 `GET /v1/backtests/{instrument_id}?strategy=PULLBACK&horizon=10` now has a bounded, non-overlapping, stop-first OHLC replay, 0.1% modeled friction per side, and chronological DEVELOPMENT vs HOLDOUT descriptive slices. Results stay `RESEARCH_ONLY`, `validated:false`, with metrics withheld for fewer than 20 completed trades. See [Backtest V2](docs/BACKTEST_V2.md).
 
 Review [the macOS security audit](docs/SECURITY_AUDIT_2026-10-23.md): no source-level causal link to the OS popup was established. **Do not re-run LIVE scan solely to reproduce the warning**, or disable XProtect/Gatekeeper. Continue validation with offline fixtures and DEMO mode while the Mac alert remains unresolved.
+
+
+## Historical Data Engine v1 (2026-10-23)
+
+Research-only historical archive is available with immutable candle observations, per-source/basis revisions, SHA-256 integrity checks, first-observed timestamps, corporate-action evidence, read-only `/v1/history/*` API, and offline-default CLI.
+
+```bash
+python scripts/history_ingest.py --mode demo --limit 3
+PYTHONPATH=backend python -m pytest -q backend/tests/test_history.py
+```
+
+Live provider capture requires a separate explicit `--mode live --allow-live` opt-in and must **not** be run on a machine still showing a macOS *Malicious Script Blocked* warning. Read [Historical Data Engine](docs/HISTORICAL_DATA_ENGINE.md) and [security review](docs/SECURITY_AUDIT_HISTORY.md). This first-observed archive does **not** certify historical point-in-time availability or realistic split-adjusted/raw fills.
