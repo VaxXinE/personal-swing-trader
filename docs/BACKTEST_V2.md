@@ -64,3 +64,8 @@ claim or an input for strategy parameter tuning. Do not relax live criteria sole
 to make the DEMO generator print trades. Next research milestone: real
 point-in-time historical candidate universe, split-adjustment checks, transaction
 friction measured by market, and held-out multi-symbol period tests.
+
+
+## Archived-replay integration
+
+For read-only, locally stored observation candles, use `GET /v1/history/backtests/{instrument_id}?source=SYNTHETIC_FIXTURE&price_basis=SYNTHETIC` in DEMO mode or `python scripts/archive_backtest.py`. The replay result includes an observation-time cutoff and SHA-256 fingerprint so the same revisions can be requested explicitly. No new provider calls are made. This does **not** establish vendor point-in-time availability or validated execution prices. See [ARCHIVED_BACKTEST_INTEGRATION](ARCHIVED_BACKTEST_INTEGRATION.md).

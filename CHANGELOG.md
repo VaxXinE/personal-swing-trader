@@ -1,3 +1,9 @@
+## 2026-10-23 — Archived historical backtesting bridge
+
+- Add provider-free, read-only archived backtests with reproducible SHA-256 observation snapshots and fail-closed source/mode mixing.
+- Add conservative quality gate for suspected splits/long gaps, archive replay API, offline CLI, web asset-detail action, and 11 offline contract tests.
+- Keep original backtest/scan API behavior and `validated:false`, do not initiate any LIVE provider request during archived replay.
+
 ## 2026-10-23 — Bounded historical source windows
 
 - Add opt-in start/end calendar capture to the Historical Data Engine, with fail-closed Yahoo EOD finality and fixed-origin Binance spot pagination.

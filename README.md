@@ -179,3 +179,15 @@ PYTHONPATH=backend python -m pytest -q backend/tests/test_history.py
 Live provider capture requires a separate explicit `--mode live --allow-live` opt-in and must **not** be run on a machine still showing a macOS *Malicious Script Blocked* warning. Read [Historical Data Engine](docs/HISTORICAL_DATA_ENGINE.md) and [security review](docs/SECURITY_AUDIT_HISTORY.md). This first-observed archive does **not** certify historical point-in-time availability or realistic split-adjusted/raw fills.
 
 For explicitly requested historical date ranges (ONLY after Mac security warning is resolved), see `scripts/history_ingest.py --help` and `docs/HISTORICAL_DATA_ENGINE.md`. The provider request remains capped at 2,500 candles per ingest with unverified adjustment basis.
+
+
+## Replay from stored Historical Data Engine snapshots
+
+Backtest Engine V2 can now replay **previously ingested observations** without calling Yahoo/Binance. The original `/v1/backtests/*` endpoint is unchanged. DEMO example:
+
+```bash
+python scripts/history_ingest.py --mode demo --limit 3
+python scripts/archive_backtest.py --mode demo --instrument-id US:NASDAQ:MSFT --strategy PULLBACK
+```
+
+The asset details modal also has an **Archived backtest** button. Results identify `archive_snapshot.as_of_observation` and `archive_snapshot.sha256`; send both back to check against later revisions. Mode/basis mismatches and unsafe price gaps fail closed. This is **research-only**, NOT historical point-in-time certification or executable trading. See [Archived Backtest Integration](docs/ARCHIVED_BACKTEST_INTEGRATION.md).

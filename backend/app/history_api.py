@@ -4,6 +4,8 @@ from __future__ import annotations
 from fastapi import APIRouter, HTTPException, Query
 from .config import settings
 from .history import HistoryStore, HistoryError
+from .archive_backtest import replay_from_archive, ArchiveNotFound, SnapshotMismatch
+from .registry import get_instruments
 
 router = APIRouter(prefix='/v1/history', tags=['historical-research'])
 store = HistoryStore(settings.db_path.parent / 'history.sqlite')
@@ -34,3 +36,34 @@ def history_actions(instrument_id: str, source: str, as_of: str | None = None):
                 'adjustment_applied': False, 'point_in_time_validated': False}
     except HistoryError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@router.get('/backtests/{instrument_id:path}')
+def replay_archived_history(
+    instrument_id: str,
+    source: str = Query(..., min_length=3, max_length=64),
+    price_basis: str = Query(..., min_length=3, max_length=40),
+    strategy: str = Query('PULLBACK', pattern='^(PULLBACK|BREAKOUT)$'),
+    horizon: int = Query(10, ge=2, le=20),
+    as_of: str | None = Query(None, max_length=40),
+    limit: int = Query(2500, ge=1, le=2500),
+    expected_snapshot_sha256: str | None = Query(None, pattern='^[0-9a-f]{64}$'),
+):
+    """Offline-only archive replay; no provider access or archive mutation."""
+    instrument = next((item for item in get_instruments(settings.data_mode)
+                       if item.instrument_id == instrument_id), None)
+    if instrument is None:
+        raise HTTPException(404, 'Unknown instrument in current registry')
+    try:
+        return replay_from_archive(
+            store, instrument, mode=settings.data_mode, source=source,
+            price_basis=price_basis, strategy=strategy, horizon=horizon,
+            as_of=as_of, limit=limit,
+            expected_snapshot_sha256=expected_snapshot_sha256,
+        )
+    except ArchiveNotFound as exc:
+        raise HTTPException(404, str(exc)) from exc
+    except SnapshotMismatch as exc:
+        raise HTTPException(409, str(exc)) from exc
+    except HistoryError as exc:
+        raise HTTPException(422, str(exc)) from exc
