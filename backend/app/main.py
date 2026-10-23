@@ -11,13 +11,14 @@ from pydantic import BaseModel,Field
 from .config import settings
 from .domain import position_size
 from .registry import get_instruments
+from .universe import snapshot_metadata
 from .providers import load_bars,ProviderError
 from .backtest import replay
 from .rules import ScreenerConfig,validate_rules,RuleError
 from .service import scan,get_latest
 from .storage import Store
 
-app=FastAPI(title='Personal Swing Intelligence',version='0.1.1',docs_url='/api-docs',redoc_url=None)
+app=FastAPI(title='Personal Swing Intelligence',version='0.2.0',docs_url='/api-docs',redoc_url=None)
 store=Store(settings.db_path)
 WEB=Path(__file__).resolve().parents[2]/'web'
 app.mount('/static',StaticFiles(directory=str(WEB)),name='static')
@@ -45,20 +46,20 @@ async def private_guard(request:Request,call_next):
 def home():return FileResponse(WEB/'index.html')
 
 @app.get('/health/live')
-def live():return {'status':'ok','version':'0.1.1','mode':settings.data_mode}
+def live():return {'status':'ok','version':'0.2.0','mode':settings.data_mode}
 
 @app.get('/health/ready')
 def ready():return {'status':'ok','database':store.path.exists(),'provider_mode':settings.data_mode}
 
 @app.get('/v1/meta')
-def meta():return {'version':'0.1.1','mode':settings.data_mode,'private':True,
+def meta():return {'version':'0.2.0','mode':settings.data_mode,'private':True,
                    'forecasts':'NOT_VALIDATED','order_execution':'DISABLED',
                    'execution_checks':'UNVERIFIED', 'supported_markets':['US','IDX','CRYPTO'],
                    'source_notice':'Demo means 100% synthetic data; LIVE uses external feeds and can fail.'}
 
 @app.get('/v1/instruments')
 def instruments(search:str='',market:str='ALL'):
-    return {'items':[i.__dict__ for i in get_instruments() if (market=='ALL' or i.market==market) and
+    return {'items':[i.__dict__ for i in get_instruments(settings.data_mode) if (market=='ALL' or i.market==market) and
                      (search.lower() in i.symbol.lower() or search.lower() in i.name.lower())]}
 
 @app.get('/v1/opportunities')
@@ -74,13 +75,20 @@ def opportunities(market:str='ALL',strategy:str='BOTH',min_score:int=Query(0,ge=
     return {'run_id':result['run_id'],'generated_at':result['generated_at'],
             'mode':settings.data_mode,'total':len(items),'items':items,
             'errors':result['errors'],'exclusions':result['exclusions'],
+            'coverage':result.get('coverage', {}),
             'forecast_status':'NOT_VALIDATED'}
 
 @app.get('/v1/universe')
 def universe():
     result=get_latest(store,settings.data_mode)
-    return {'mode':settings.data_mode,'run_id':result['run_id'],'instruments':len(get_instruments()),
+    return {'mode':settings.data_mode,'run_id':result['run_id'],'instruments':len(get_instruments(settings.data_mode)),
             'excluded':result['exclusions'],'provider_errors':result['errors']}
+
+
+@app.get('/v1/universe/discovery')
+def universe_discovery():
+    return {'mode': settings.data_mode, 'registry_count':len(get_instruments(settings.data_mode)),
+            **snapshot_metadata()}
 
 @app.get('/v1/instruments/{instrument_id:path}/analysis')
 def analysis(instrument_id:str):
@@ -127,7 +135,7 @@ def watchlist():return {'items':store.watchlist()}
 
 @app.post('/v1/watchlist')
 def add_watch(body:WatchRequest):
-    if body.instrument_id not in {i.instrument_id for i in get_instruments()}:raise HTTPException(422,'Unknown instrument')
+    if body.instrument_id not in {i.instrument_id for i in get_instruments(settings.data_mode)}:raise HTTPException(422,'Unknown instrument')
     store.add_watch(body.instrument_id,body.notes)
     return {'ok':True}
 
@@ -155,7 +163,7 @@ def journal():return {'items':store.journal()}
 def add_trade(body:TradeRequest):
     if body.side!='LONG' or body.mode not in ('PAPER','MANUAL'):
         raise HTTPException(422,'Only paper/manual long-only trades supported')
-    if body.instrument_id not in {i.instrument_id for i in get_instruments()}:
+    if body.instrument_id not in {i.instrument_id for i in get_instruments(settings.data_mode)}:
         raise HTTPException(422,'Unknown instrument')
     if body.stop is not None and not 0<body.stop<body.entry:raise HTTPException(422,'Stop must be below entry')
     if body.exit is not None and body.exit<=0:raise HTTPException(422,'Invalid exit')
@@ -182,7 +190,7 @@ def size(body:SizeRequest):
 @app.get('/v1/backtests/{instrument_id:path}')
 def backtest(instrument_id:str,strategy:str='PULLBACK',horizon:int=10):
     if strategy not in ('PULLBACK','BREAKOUT'):raise HTTPException(422,'Invalid strategy')
-    ins=next((i for i in get_instruments() if i.instrument_id==instrument_id),None)
+    ins=next((i for i in get_instruments(settings.data_mode) if i.instrument_id==instrument_id),None)
     if ins is None:raise HTTPException(404,'Unknown instrument')
     try:
         bars,_,_,_=load_bars(ins,settings.data_mode)

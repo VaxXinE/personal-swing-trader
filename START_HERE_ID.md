@@ -22,6 +22,25 @@ Setelah mode demo berfungsi, stop server. Dari root repository:
 
 Mode live mengambil saham AS/BEI lewat `yfinance` dan crypto melalui endpoint publik Binance. Sumber ini bisa diblokir, *rate-limited*, berubah atau mengembalikan data tidak lengkap. **Jika gagal, sistem akan melaporkan error, bukan memalsukan harga.** Beri izin penggunaan dan periksa persyaratan masing-masing sumber. `config/universe.json` berisi ticker yang hendak discan.
 
+## 2b. Perluas daftar aset (Dynamic Liquid Universe V2)
+
+Setelah `--live` berjalan, buka terminal baru di folder proyek, lalu:
+
+```bash
+source .venv/bin/activate
+python scripts/sync_universe.py --markets US CRYPTO
+```
+
+Jika status sukses, kembali ke web aplikasi di port 8001 dan klik **Run Scan**. Lihat **Data Health** untuk jumlah aset yang ditemukan, dipilih, dianalisis, dikecualikan, atau gagal. Default discovery menambahkan maksimum 24 kandidat AS dan 18 pair crypto (beberapa bisa duplikat baseline).
+
+IDX **belum dapat auto-sync dari bursa**. Unduh CSV daftar saham dari situs resmi BEI, pastikan kolom `Kode`, `Nama Perusahaan`, bila ada `Papan Pencatatan`, lalu:
+
+```bash
+python scripts/sync_universe.py --markets IDX --idx-csv ~/Downloads/saham-idx.csv
+```
+
+Perhatikan: daftar US yang baru ditemukan belum diperingkat berdasarkan likuiditas; crypto pra-seleksi menggunakan volume 24 jam, sedangkan filter historis memakai ADV20. **Keduanya tidak menjamin bisa dieksekusi.** Bila provider gagal, skrip mengembalikan error dan tidak mengganti daftar lama dengan data palsu. Baca `docs/DYNAMIC_UNIVERSE_V2.md`.
+
 ## 3. APK Android pribadi
 
 **APK belum disertakan** karena Flutter dan Android toolchain belum tersedia pada environment pembuatan paket. Dua cara membuild:

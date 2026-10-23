@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.0-alpha (2026-10-23)
+- Opt-in Dynamic Liquid Universe candidate discovery, provider-specific sourcing, atomic local cache, bounded registry expansion.
+- Data Health discovery/scan coverage, grouped Opportunity Explorer per asset, API discovery endpoint.
+- Preserve baseline on provider failure, 15-minute EOD data cache; regression and browser smoke tests.
+- Explicit IDX official CSV path, no undocumented auto-scraping and no live/profitability guarantees.
+
+# Changelog
+
 ## [0.1.0] — 2026-10-23
 - Initial documentation blueprint for private mobile personal swing intelligence system.
 - Locked: long-only, manual trading, liquid universe, broad discovery, US/IDX/crypto spot, Flutter/FastAPI.

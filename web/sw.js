@@ -1,5 +1,5 @@
 // Installable shell only. Never cache /v1 API or personal research data.
-const CACHE = 'swing-static-v011';
+const CACHE = 'swing-static-v020';
 const ASSETS = ['/', '/static/styles.css', '/static/app.js', '/static/manifest.webmanifest', '/static/icon-192.png'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(ASSETS)).then(() => self.skipWaiting()));

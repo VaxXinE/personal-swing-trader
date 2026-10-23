@@ -1,6 +1,6 @@
 # Application Package Manifest
 
-**Version:** 0.1.1-alpha  
+**Version:** 0.2.0-alpha  
 **Date:** 2026-10-23  
 **Type:** runnable browser + FastAPI research alpha and Flutter mobile source; not a production release.
 
@@ -11,7 +11,9 @@
 - `backend/`: demo/live provider adapters, scan engine, SQLite watchlist/journal, rule validator and private API.
 - `apps/mobile/`: Flutter client **source**, Android platform scaffold generated on Flutter machine or GitHub Actions.
 - `.github/workflows/`: optional CI job that builds an APK **if successful** (not tested here).
-- `config/`: explicit market-universe registry; no credentials stored.
+- `config/`: manual market-universe baseline; no credentials stored.
+- `scripts/sync_universe.py` and `backend/app/universe.py`: opt-in US/crypto discovery and IDX CSV import.
+- `data/discovered_universe.json`: created locally after sync; gitignored.
 - `docs/`: original strategy, risk, architecture, API and roadmap specifications.
 - `BUNDLE_MANIFEST.json`: SHA-256 inventory of packaged files (excludes itself).
 

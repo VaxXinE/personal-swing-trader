@@ -1,0 +1,53 @@
+# Dynamic Liquid Universe V2 — Engineering Contract
+
+**Status:** Implemented as opt-in discovery + audited historical liquidity gate, 2026-10-23. **NOT** a whole-market liquid screener, real-time exchange listing service, or trade-execution validator.
+
+## Goal
+
+Expand the initial 19-symbol manual registry without hardcoding more names, using public listing/trading metadata where permitted, then require the existing 20-session historical turnover gate before assets appear in default Explore. Every scan result is still research-only.
+
+## Modes and data lifecycle
+
+1. `config/universe.json`: stable user-maintained baseline, authoritative on duplicate canonical IDs.
+2. `python scripts/sync_universe.py --markets US CRYPTO`: user-initiated discovery. This command uses known HTTPS provider hosts (no user-supplied API URL). It writes `data/discovered_universe.json` atomically; the file is gitignored.
+3. `--markets IDX --idx-csv <path>`: import a **user-exported official IDX CSV** with `Kode`, `Nama Perusahaan`, optionally `Papan Pencatatan`. Does not fetch/scrape unofficial IDX APIs. Rows from Papan Pemantauan Khusus are excluded **only if** column is present; absence of board info is NOT a status verification.
+4. In LIVE mode only, `registry.get_instruments('live')` merges baseline + discovery, up to 250 unique canonical IDs. DEMO intentionally uses the 19 baseline instruments to keep tests deterministic.
+5. **Run Scan separately** to compute OHLCV history, 20-session ADV/median turnover, EOD indicators, score, and exclusion reasons. Latest scan is stored as an immutable snapshot. A new sync DOES NOT mutate an old scan.
+6. GET `/v1/universe/discovery` provides source/sync provenance and counts; `/v1/opportunities` provides per-market attempted/analyzed/excluded/errors coverage from the last scan. Data Health shows both. No network calls during ordinary screen viewing.
+
+## Provider-specific behavior
+
+| Market | Discovery | Eligibility caveat |
+|---|---|---|
+| US | Nasdaq Trader `nasdaqlisted.txt` and `otherlisted.txt`; exclude ETF/test/special instruments and known Nasdaq financial status issues | Official directory has no turnover. Deterministic month-rotating symbol sample is NOT the top liquid companies or full-US scan. Provider may change text fields. The 20-day ADV filter runs later. |
+| Crypto | Binance spot `exchangeInfo` + rolling-24h `/ticker/24hr` in USDT, capped top-ranked by recent quote volume | 24-hour quote volume only prescreens candidates. It is not ADV20. The scanner checks final daily candles, historical turnover, spread when available and active-symbol status. Region/provider availability may vary. |
+| IDX | Explicit CSV import from IDX listing page | No reliable public automatic IDX directory adapter is claimed. CSV age, board/suspension status and price tick histories need independent verification. |
+
+Listings do NOT prove active accessibility at the user's broker. A symbol's live tradability / corporate action / exchange calendar / split handling remain incomplete. Quote freshness and transaction cost can prevent execution verification even when a historical liquidity filter passes.
+
+## CLI examples
+
+```bash
+# From repository root, with .venv activated or python3 accessible:
+python scripts/sync_universe.py --markets US CRYPTO
+python scripts/sync_universe.py --markets US --us-limit 15
+python scripts/sync_universe.py --markets IDX --idx-csv ~/Downloads/idx-stock-list.csv --idx-limit 30
+# After sync, start (or keep) the live backend and click Run Scan in dashboard:
+bash scripts/start.sh --live --port 8001
+```
+
+Set each per-market limit from 1 to 75; baseline + discovery cannot exceed 250 combined. Default is 24 US + 18 crypto; IDX defaults to 35 when explicitly imported. A provider failure gives a nonzero CLI exit and retains the last successful candidates for that market rather than secretly substituting made-up symbols. Provider errors are visible in CLI output. If a source's response format changes, parser fails closed.
+
+## Performance and operational safety
+
+- Market-data collection is still **sequential** and can be slow. The command only updates listing candidates; OHLCV requests happen later during Run Scan. For large universes, run the scan via `python scripts/scan_once.py` in a terminal instead of relying on an HTTP request that a browser might abandon.
+- Successful LIVE provider reads cache in memory for a bounded 15-minute bucket to reduce accidental repeated calls; they are EOD, not live bids for order placement. No failures are cached.
+- Avoid repeated manual discovery calls; providers have network restrictions and rate limits. Endpoint and schema changes are treated as errors, not as missing liquidity.
+- Dynamic files are local under `data/` and excluded from Git; `.env`/keys/journals remain excluded. Do not deploy CLI discovery as an unauthenticated public API.
+- No trading execution, authenticated broker support, real-time alerts, ML forecasts, or benchmark-calibrated cross-market score in this release.
+
+## Verification and known limitations
+
+Tests use local fixture responses and exercise parser validation, 24h-vs-ADV distinction, IDX CSV, fail-preserving snapshot, registry precedence, and API coverage. No real provider production connectivity was verified in the build environment. US 'liquid' candidates may be few when the directory's selected samples are illiquid. A future US price/volume first-stage source would improve candidate selection, but should not be fabricated from directory membership.
+
+Suggested next steps: official IDX status/calendar integration, batched historical data retrieval with provider throttling, quote freshness/reconciliation, proper time-aware historical universe snapshots, and price-source confidence validation.

@@ -2,7 +2,7 @@
 
 **Bahasa Indonesia / Quick Start:** [START_HERE_ID.md](START_HERE_ID.md). Untuk developer, mulai dari [AGENTS.md](AGENTS.md) dan [IMPLEMENTATION_STATUS.md](IMPLEMENTATION_STATUS.md).
 
-**Version:** `0.1.1-alpha` · **Date:** 2026-10-23 · **Owner:** single developer/user · **Scope:** long-only; US + IDX equities and crypto spot.
+**Version:** `0.2.0-alpha` · **Date:** 2026-10-23 · **Owner:** single developer/user · **Scope:** long-only; US + IDX equities and crypto spot.
 
 > **THIS IS A WORKING ALPHA, NOT A FINISHED FORECAST PLATFORM.** The browser app and private API work in synthetic demo mode, and optional market data adapters exist. No trade execution. Quote verification, fundamentals, historical-bias-free validation, and ML probabilities are **not** production ready. All synthetic data is labelled, and all forecasts are withheld.
 
@@ -20,9 +20,24 @@ The launcher installs backend dependencies into `.venv/`, runs the local API on 
 
 **http://127.0.0.1:8000/**
 
-Explore now starts with **Liquid Universe only**; toggle "Include excluded / illiquid assets" to inspect rejected instruments. Try **Overview → Explore → Asset detail → Add to Watchlist → Journal**, or open **Screener Builder** and create an AND/OR rule. There are **19 preset research instruments** in `config/universe.json`. You can add more instruments (up to 250) by editing that file, then restart/re-run the scanner. DEMO mode generates deterministic synthetic candles, **not market prices**, and the quote/execution gate remains UNKNOWN.
+Explore now starts with **Liquid Universe only**; toggle "Include excluded / illiquid assets" to inspect rejected instruments. Try **Overview → Explore → Asset detail → Add to Watchlist → Journal**, or open **Screener Builder** and create an AND/OR rule. There are **19 manual baseline research instruments** in `config/universe.json`. You can add more instruments (up to 250) by editing that file, then restart/re-run the scanner. DEMO mode generates deterministic synthetic candles, **not market prices**, and the quote/execution gate remains UNKNOWN.
 
 Swagger/OpenAPI: `http://127.0.0.1:8000/api-docs`.
+
+## 1b. Dynamic candidate universe (V2 opt-in)
+
+The first 19 symbols remain as the safe baseline. To discover additional US directory listings and Binance active USDT spot pairs **without hand-editing tickers**:
+
+```bash
+source .venv/bin/activate
+python scripts/sync_universe.py --markets US CRYPTO
+# On successful sync, click Run Scan in the LIVE dashboard; or run:
+SWING_DATA_MODE=live python scripts/scan_once.py
+```
+
+For IDX, export a CSV from the official IDX stock-listing page, then run
+`python scripts/sync_universe.py --markets IDX --idx-csv /path/to/idx-list.csv`.
+This is **NOT a fully automatic IDX integration**. The UI Data Health page shows source, count, sync date and analysis coverage. Candidate pre-selection is not a claim of actual liquidity. US discovery deliberately samples the directory; crypto uses rolling 24h volume only before the true ADV20 filter. Discovery is local/explicit, never called on every dashboard request. See [docs/DYNAMIC_UNIVERSE_V2.md](docs/DYNAMIC_UNIVERSE_V2.md) for details and limitations.
 
 ## 2. Optional REAL market research data
 
@@ -93,7 +108,9 @@ The app has no brokerage connections, withdrawal capability, or automated execut
 | `backend/app/service.py` | Scans, rankings and immutable run snapshots |
 | `backend/app/storage.py` | SQLite watchlist, journal, screener versions and signals |
 | `backend/app/main.py` | FastAPI + endpoints + private token guard |
-| `config/universe.json` | Editable symbol/market registry |
+| `config/universe.json` | Editable manual baseline symbol/market registry |
+| `scripts/sync_universe.py` | Opt-in dynamic candidate discovery from US/Binance and official IDX CSV |
+| `data/discovered_universe.json` | Gitignored local discovery snapshot (created on sync) |
 | `scripts/scan_once.py` | EOD scan to schedule via OS cron/task scheduler |
 | `scripts/backup.py` | SQLite consistent backup (unencrypted: store encrypted separately) |
 | `docs/` | 25+ original engineering blueprint documents |
@@ -118,6 +135,6 @@ Docker option (advanced): `SWING_API_TOKEN=<random-32+-chars> docker compose -f 
 
 **Usable now:** responsive web dashboard, filtered discovery, editable symbol registry, deterministic Pullback/Breakout baseline, estimated turnover liquidity, explainable heuristic scoring, evidence and blocking reasons, custom AND/OR rules (nested rules at API), saved versioned screeners, watchlist, paper/manual journal, risk calculator, research historical replay, source/freshness labels, immutable signal log, 22 automated backend tests, optional Yahoo/Binance source adapters.
 
-**Not yet delivered:** licensed exchange-level realtime streaming, independently verified trade-readiness, complete exchange listings/IDX rule timeline, corporate-action safe backtests across delisted universe, institutional-grade data QC, validated prediction ML and probability intervals, full mobile custom rule nesting, push notifications, scheduled jobs by market calendar, native APK, successful Flutter/Android CI run.
+**Not yet delivered:** automatic full-market US/IDX discovery & comprehensive coverage, licensed exchange-level realtime streaming, independently verified trade-readiness, complete exchange listings/IDX rule timeline, corporate-action safe backtests across delisted universe, institutional-grade data QC, validated prediction ML and probability intervals, full mobile custom rule nesting, push notifications, scheduled jobs by market calendar, native APK, successful Flutter/Android CI run.
 
 The original PRD is the **target specification**, not a claim that all 30 tasks or requirements are completed. See [IMPLEMENTATION_STATUS.md](IMPLEMENTATION_STATUS.md) and [docs/TASKS.md](docs/TASKS.md) for remaining work.

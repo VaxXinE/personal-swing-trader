@@ -1,4 +1,4 @@
-# Implementation Status — Alpha 0.1.1
+# Implementation Status — Alpha 0.2.0
 
 **As of:** 2026-10-23. This tracks features honestly relative to `PRD.md`. Data in demo mode is fictional; trading probabilities are gated off.
 
@@ -57,3 +57,15 @@
 - Yahoo daily equity rows carry a trading-session date, not a trustworthy precise last-trade timestamp. Previously the conservative readiness guard (17:00 America/New_York / 16:30 Asia/Jakarta) was reused as the candle close timestamp. Now it is a separate guard from the **derived normal-session close marker** (US 16:00 ET; IDX 16:02 WIB after regular closing matching).
 - Every new setup includes `candle_metadata`: `timestamp_basis`, `finality_basis`, `last_session_date`, `age_hours_at_scan`, `validation_scope`, and `calendar_validated=false`. These are explicit limitations, not a claim of verified live quotes. Data Health shows market coverage and timestamp provenance.
 - This is a partial safety fix, not a complete official session calendar. Early close/holidays and provider latency need dedicated calendars and point-in-time sources. Existing SQLite signal/run snapshots remain intentionally unchanged; re-run scanner to produce new metadata.
+
+## v0.2.0 Dynamic Universe supplement (2026-10-23)
+
+- US: Nasdaq Trader directory parsing and bounded month-rotating sample; **not full market / not liquidity-ranked**.
+- Crypto: Binance active USDT spot candidates sorted by rolling 24h quote volume, then historical ADV20 scanned.
+- IDX: explicit official CSV import, no undocumented API or misleading full auto-coverage.
+- `data/discovered_universe.json`: local atomic snapshot, partial failure retains existing market; manual config wins on duplicate IDs; demo isolated; cap 250 total.
+- API GET `/v1/universe/discovery`, per-market `coverage` in scan results and Data Health panel.
+- Explorer grouped into one card per asset (best matched setup) with strategy breakdown; cross-market results still separate rather than ranking uncalibrated scores together.
+- LIVE provider EOD successful reads are cached in memory for 15 minutes. Not realtime. Scanning is still sequential.
+- Offline parser/sync regression tests: **35/35 backend tests**, HTTP smoke and mock browser UI smoke passed locally. Provider connectivity after deployment not yet verified.
+- **Outstanding:** IDX official historical trading status, Nasdaq directory candidate liquidity prescreen, provider batch calls, full historical point-in-time universe, production Android build, probability validation, session-calendar aware scheduler.

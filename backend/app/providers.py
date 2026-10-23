@@ -2,6 +2,8 @@
 from __future__ import annotations
 import math
 import random
+from functools import lru_cache
+import time as clock
 from datetime import datetime, timezone, timedelta, time, date
 from zoneinfo import ZoneInfo
 import httpx
@@ -119,10 +121,21 @@ def fetch_binance(ins:Instrument) -> tuple[list[Candle],Quote|None]:
     except Exception as exc:raise ProviderError(f'Crypto provider unavailable: {type(exc).__name__}') from exc
 
 
+@lru_cache(maxsize=500)
+def _cached_live(ins: Instrument, window: int) -> tuple[tuple[Candle, ...], Quote | None, str]:
+    """Cache successful EOD provider reads per 15-minute window (bounded memory).
+
+    No error is cached. A quote served from this cache must NEVER be labeled
+    realtime or execution-verified, and actual finality must be rechecked later.
+    """
+    if ins.market == 'CRYPTO':
+        bars, quote = fetch_binance(ins)
+        return tuple(bars), quote, 'BINANCE_SPOT_EOD'
+    bars, quote = fetch_yfinance(ins)
+    return tuple(bars), quote, 'YFINANCE_RESEARCH_RAW'
+
+
 def load_bars(ins:Instrument,mode:str) -> tuple[list[Candle],Quote|None,str,str]:
     if mode=='demo':return demo_bars(ins),None,'SYNTHETIC_FIXTURE','DEMO'
-    if ins.market=='CRYPTO':
-        bars,quote=fetch_binance(ins)
-        return bars,quote,'BINANCE_SPOT_EOD','EOD'
-    bars,quote=fetch_yfinance(ins)
-    return bars,quote,'YFINANCE_RESEARCH_RAW','EOD'
+    bars, quote, source = _cached_live(ins, int(clock.time() // 900))
+    return list(bars), quote, source, 'EOD'

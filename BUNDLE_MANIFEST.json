@@ -1,6 +1,6 @@
 {
   "project": "Personal Swing Intelligence",
-  "version": "0.1.1-alpha",
+  "version": "0.2.0-alpha",
   "date": "2026-10-23",
   "type": "Runnable FastAPI + browser research alpha, Flutter source, optional unverified GitHub Android build",
   "warnings": [
@@ -38,18 +38,18 @@
     },
     {
       "path": "CHANGELOG.md",
-      "bytes": 1891,
-      "sha256": "43b72e5eb0807ef77954d5a887003481f3af6f39c219b1ab75c03a1ef386d3b7"
+      "bytes": 2371,
+      "sha256": "a95dcd8d982ef5291d585751eb7006a772496c7f3d12c1065cde26f29738e26f"
     },
     {
       "path": "IMPLEMENTATION_STATUS.md",
-      "bytes": 5510,
-      "sha256": "fe99dfa44c5a71b422c5e8aef5085131ba7550bf5b5b1e500432ec34f97e023f"
+      "bytes": 7879,
+      "sha256": "594abbbb95d7bf28656b5b9d4bd8c5656b45879202b5c0cf3a493aaad61d384d"
     },
     {
       "path": "MANIFEST.md",
-      "bytes": 1291,
-      "sha256": "edd2eb52c820d556bd53ba4c0eac730f31ca924f4868f239b97269ab2ca3ffd5"
+      "bytes": 1471,
+      "sha256": "c3551be3c580b840149decfc66ebac80f7320c95c07cd0469e0fa2e37f65c21c"
     },
     {
       "path": "PRD.md",
@@ -58,13 +58,13 @@
     },
     {
       "path": "README.md",
-      "bytes": 9183,
-      "sha256": "ffae77fbf3c488f69e99e4b8a107b07efb9cb36db2089e83e59f70fb8e26d75c"
+      "bytes": 10511,
+      "sha256": "066532fea54cc2b3b91e119a699fc06808a3c2e0f511e937009b010cd8ae4cb3"
     },
     {
       "path": "START_HERE_ID.md",
-      "bytes": 4657,
-      "sha256": "41f59658c7ee1a5cf1f9455e9a3b77ee83c6713131784645345d7d7b122d1e99"
+      "bytes": 5779,
+      "sha256": "bae3a5a7d3d9ebe06d8acf888c69460e436672f369bd851b54bc8f96e6bc5a72"
     },
     {
       "path": "apps/mobile/analysis_options.yaml",
@@ -113,18 +113,18 @@
     },
     {
       "path": "backend/app/main.py",
-      "bytes": 8865,
-      "sha256": "e487a74519cc9f97bd5a18cd9f856b1e72603b41b00c6e35ee41bf399bb12334"
+      "bytes": 9243,
+      "sha256": "6f7fd6153e078132b47d3f84bf65c3bffe5aa1f56fee76c7ca4939665658dc76"
     },
     {
       "path": "backend/app/providers.py",
-      "bytes": 6196,
-      "sha256": "567ba4e855955e9f1541d11d2ac534f92960e97ea5f2e8f1fd4625309489d5db"
+      "bytes": 7736,
+      "sha256": "13b2c0c31c081aa8bb51e2adf39032aca9efbb8e0b6ba5400569fba3ef3a7668"
     },
     {
       "path": "backend/app/registry.py",
-      "bytes": 1398,
-      "sha256": "1509ebc5e768200ef04edeb2d6c6d279a3e889afcde1b535f29d18cad8e891ba"
+      "bytes": 2242,
+      "sha256": "3bd70889241845601a250d0de14755231715f3a66a4dedd346a196a744081371"
     },
     {
       "path": "backend/app/rules.py",
@@ -133,13 +133,18 @@
     },
     {
       "path": "backend/app/service.py",
-      "bytes": 3118,
-      "sha256": "aa87a8f58b713ef31d6e5762b82ca030d9fbdd1eeb8a16b99f0a52c2e7663035"
+      "bytes": 4866,
+      "sha256": "f723b2c44421114330665c8054e4f44c611df1bd2edd7e40b6b7ae455bb2f3ac"
     },
     {
       "path": "backend/app/storage.py",
       "bytes": 5235,
       "sha256": "f0a14e180aac253d9723d3a8ebb990a204e17fa56dadcc20e367f3a0a1f9ca8b"
+    },
+    {
+      "path": "backend/app/universe.py",
+      "bytes": 13356,
+      "sha256": "bf2d5836e6b8b5d4e737b1874940882755e61a1ac328955196ba7e1407880f3d"
     },
     {
       "path": "backend/requirements-dev.txt",
@@ -177,19 +182,24 @@
       "sha256": "91cddded36582b12db40aba796826c82c1de5d54a905e0796495c96194296b23"
     },
     {
+      "path": "backend/tests/test_dynamic_universe.py",
+      "bytes": 7254,
+      "sha256": "b2f44aa76af24df46ad2a767039ef0c6879d5caf8ad3d0f1d0f8fc1ad3c927fb"
+    },
+    {
       "path": "backend/tests/test_rules.py",
       "bytes": 1194,
       "sha256": "8e59fd3d93b5e7e2576d5bcda12f1661ca97324eaa1b8afed9c7769ceb10035f"
     },
     {
+      "path": "backend/tests/test_timestamp_provenance.py",
+      "bytes": 2463,
+      "sha256": "b3a1db9e7c0cd95389504da57a06a856bbe8bb7a4a09c63fc1b9ceb20e7fc033"
+    },
+    {
       "path": "config/universe.json",
       "bytes": 4727,
       "sha256": "1a380b00a5a30cfc3b119437acf1bbe19421a2ef6bdcbc367a5640182c6f8811"
-    },
-    {
-      "path": "data/.gitkeep",
-      "bytes": 0,
-      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     {
       "path": "design.md",
@@ -240,6 +250,11 @@
       "path": "docs/DEVELOPMENT_SETUP.md",
       "bytes": 3362,
       "sha256": "44f5aae8bdcec44665d8a546844d27ae8f04d4ad06231e42b0de735c401b602e"
+    },
+    {
+      "path": "docs/DYNAMIC_UNIVERSE_V2.md",
+      "bytes": 5777,
+      "sha256": "aaf8639763e9c1ef19cdce05d50e48674dbee61ced873abf0aaaeb17d9ddbbe8"
     },
     {
       "path": "docs/EXPLANATION_POLICY.md",
@@ -387,14 +402,19 @@
       "sha256": "342651b9095dcec9cbf3fab76748180913dd6eba39bfbbd036fd4a46dcf403e8"
     },
     {
+      "path": "scripts/sync_universe.py",
+      "bytes": 1572,
+      "sha256": "2dfef12a8166aa3603c977be83f70a6cc7ab1522ac3667802c16622400507c01"
+    },
+    {
       "path": "scripts/ui_smoke.py",
       "bytes": 2998,
       "sha256": "9fafbdb694022bb7a29144c845c709a743abd5da0680034083d9477f9915713f"
     },
     {
       "path": "web/app.js",
-      "bytes": 29168,
-      "sha256": "c5168160a104d2eeb2efbe43603697abf77bb1289810be0513649b70e0932ba3"
+      "bytes": 32762,
+      "sha256": "80f0ed8a260ee14d14ef11abd1e56a9cd56e6eb95c1998c4bb44a3843081d0a0"
     },
     {
       "path": "web/icon-192.png",
@@ -409,7 +429,7 @@
     {
       "path": "web/index.html",
       "bytes": 2727,
-      "sha256": "d7062e867a17518337a571d7a6cea28adb789d8b2a9101a66b9563463bae7fc5"
+      "sha256": "fba6acb710227c9b49747741d1b7100cda8a96ff0cd1e339086364f1f98caeed"
     },
     {
       "path": "web/manifest.webmanifest",
@@ -444,7 +464,7 @@
     {
       "path": "web/sw.js",
       "bytes": 1182,
-      "sha256": "e1ac191447acadd900353369c05346b968686da343164541bed81aff424fe86b"
+      "sha256": "323780b0cda69fdadef9acbbb7a9ab451de2964042cf885e80bc340f2dae23d3"
     }
   ]
 }

@@ -11,13 +11,15 @@ from .storage import Store,utcnow
 
 def scan(store:Store,mode:str,config:ScreenerConfig)->dict:
     items=[];errors=[];excluded=[]
-    for ins in get_instruments():
-        if ins.market not in config.markets:continue
+    analyzed_by_market={m:set() for m in ('US','IDX','CRYPTO')}
+    registry = tuple(i for i in get_instruments(mode) if i.market in config.markets)
+    for ins in registry:
         try:
             bars,quote,source,data_status=load_bars(ins,mode)
             validate_candles(bars)
             if len(bars)<60:raise ProviderError('Less than 60 valid daily candles')
             analysis=analyze(ins,bars,quote)
+            analyzed_by_market[ins.market].add(ins.instrument_id)
             analysis['source']=source
             analysis['data_status']=data_status
             close_at=datetime.fromisoformat(bars[-1].at.replace('Z','+00:00'))
@@ -50,12 +52,17 @@ def scan(store:Store,mode:str,config:ScreenerConfig)->dict:
             errors.append({'instrument_id':ins.instrument_id,'error':str(exc)[:240]})
         except Exception as exc:
             errors.append({'instrument_id':ins.instrument_id,'error':f'Unexpected {type(exc).__name__} — see backend logs'})
-    # Stable deterministic order within each market, never claim calibrated ranking across markets.
+    # Stable market-relative sorting; score never claimed calibrated across markets.
     items.sort(key=lambda r:(r['market'],-r['setup']['score'],r['symbol'],r['setup']['strategy']))
+    attempted = {m:sum(i.market == m for i in registry) for m in ('US','IDX','CRYPTO')}
+    successful = {m:len(analyzed_by_market[m]) for m in attempted}
+    rejected = {m:sum(x['market']==m for x in excluded) for m in attempted}
+    failures = {m:sum(i.instrument_id in {e['instrument_id'] for e in errors} for i in registry if i.market==m) for m in attempted}
+    coverage = {m:{'attempted':attempted[m], 'analyzed':successful[m], 'excluded':rejected[m], 'errors':failures[m]} for m in attempted}
     result={'generated_at':utcnow(),'data_mode':mode,'config':config.model_dump(), 'count':len(items),
             'items':items,'exclusions':excluded,'errors':errors,
             'analysis_notice':'Research baseline; score is not probability. Execution eligibility unverified. No investment advice.',
-            'forecast_status':'NOT_VALIDATED'}
+            'forecast_status':'NOT_VALIDATED','coverage':coverage}
     rid=store.new_run(config.model_dump(),mode,result)
     result['run_id']=rid
     return result
