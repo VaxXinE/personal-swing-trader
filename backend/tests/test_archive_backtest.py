@@ -22,7 +22,8 @@ class Clock:
 
 
 def make_bars(n=230):
-    start = datetime(2025, 1, 1, tzinfo=timezone.utc)
+    # Choose an EOD UTC marker whose New York session date matches the day.
+    start = datetime(2025, 1, 1, 20, tzinfo=timezone.utc)
     # Equity fixtures use weekdays. Weekends are not ordinary US sessions.
     # These are still SYNTHETIC; official holidays are NOT certified here.
     sessions = []
