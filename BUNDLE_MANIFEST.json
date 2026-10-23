@@ -1,0 +1,450 @@
+{
+  "project": "Personal Swing Intelligence",
+  "version": "0.1.1-alpha",
+  "date": "2026-10-23",
+  "type": "Runnable FastAPI + browser research alpha, Flutter source, optional unverified GitHub Android build",
+  "warnings": [
+    "Synthetic demo is not market data",
+    "Forecast predictions unavailable/not validated",
+    "Native APK not built or verified in this environment",
+    "Live data providers unverified online"
+  ],
+  "entrypoints": [
+    "START_HERE_ID.md",
+    "scripts/start.sh",
+    "scripts/start.bat",
+    ".github/workflows/verify-and-build-android.yml"
+  ],
+  "files": [
+    {
+      "path": ".env.example",
+      "bytes": 297,
+      "sha256": "7111565cf33cd24af39bb05e2d1da6f2464f89c95b74ac5e273f439b43d10735"
+    },
+    {
+      "path": ".github/workflows/verify-and-build-android.yml",
+      "bytes": 1784,
+      "sha256": "47049259a6e6fd47efe1065016c6e2ce1bbbb6eb737d91e3752de569d9079924"
+    },
+    {
+      "path": ".gitignore",
+      "bytes": 488,
+      "sha256": "63e369c1832d267090101bf6ebd644dcad7d7af9bc1cca8f20872c2fd92458c4"
+    },
+    {
+      "path": "AGENTS.md",
+      "bytes": 2804,
+      "sha256": "62f70466dc17b952068c9d4042a52f15dab6edd5ecf7b4130e708a4e9ecf344e"
+    },
+    {
+      "path": "CHANGELOG.md",
+      "bytes": 1891,
+      "sha256": "43b72e5eb0807ef77954d5a887003481f3af6f39c219b1ab75c03a1ef386d3b7"
+    },
+    {
+      "path": "IMPLEMENTATION_STATUS.md",
+      "bytes": 5510,
+      "sha256": "fe99dfa44c5a71b422c5e8aef5085131ba7550bf5b5b1e500432ec34f97e023f"
+    },
+    {
+      "path": "MANIFEST.md",
+      "bytes": 1291,
+      "sha256": "edd2eb52c820d556bd53ba4c0eac730f31ca924f4868f239b97269ab2ca3ffd5"
+    },
+    {
+      "path": "PRD.md",
+      "bytes": 7894,
+      "sha256": "9521e4c1c10eceaad49b48dce3c28c2cf19f7c0ef399f9bcedd1d409bcb3fa3c"
+    },
+    {
+      "path": "README.md",
+      "bytes": 9183,
+      "sha256": "ffae77fbf3c488f69e99e4b8a107b07efb9cb36db2089e83e59f70fb8e26d75c"
+    },
+    {
+      "path": "START_HERE_ID.md",
+      "bytes": 4657,
+      "sha256": "41f59658c7ee1a5cf1f9455e9a3b77ee83c6713131784645345d7d7b122d1e99"
+    },
+    {
+      "path": "apps/mobile/analysis_options.yaml",
+      "bytes": 118,
+      "sha256": "9feaff5bd7e7ca6d96341e60ac8af0c942e64f1d543943552c4c5e610a44fbec"
+    },
+    {
+      "path": "apps/mobile/lib/api.dart",
+      "bytes": 2271,
+      "sha256": "6e75049754b241cd18a696647cd8877f31d105c5d5391280a6f811eaf01e0eae"
+    },
+    {
+      "path": "apps/mobile/lib/main.dart",
+      "bytes": 26079,
+      "sha256": "b45cf48598dce2d5d791b6ede92ddee7ef9367b40e1cc452586dd86f7892ce50"
+    },
+    {
+      "path": "apps/mobile/pubspec.yaml",
+      "bytes": 386,
+      "sha256": "1a7c5514c25c87c4e98b239e558809f8f8ddd0388feae08c4b906a9b6377e1ae"
+    },
+    {
+      "path": "backend/__init__.py",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "backend/app/__init__.py",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "backend/app/backtest.py",
+      "bytes": 2546,
+      "sha256": "2a714fa5af8f522bec89a7246b8090c59f8c0aa9698938f8c94d73884adffdda"
+    },
+    {
+      "path": "backend/app/config.py",
+      "bytes": 1656,
+      "sha256": "5f4f133bfc1dc9063b9b7354a4022615f0a528a00b320dbe61ad0c047ecdf7ab"
+    },
+    {
+      "path": "backend/app/domain.py",
+      "bytes": 16329,
+      "sha256": "dfa33d5839a07d7eebc15b165f1dc1a18d25f538cf7eaf2980fe493543a67b6b"
+    },
+    {
+      "path": "backend/app/main.py",
+      "bytes": 8865,
+      "sha256": "e487a74519cc9f97bd5a18cd9f856b1e72603b41b00c6e35ee41bf399bb12334"
+    },
+    {
+      "path": "backend/app/providers.py",
+      "bytes": 6196,
+      "sha256": "567ba4e855955e9f1541d11d2ac534f92960e97ea5f2e8f1fd4625309489d5db"
+    },
+    {
+      "path": "backend/app/registry.py",
+      "bytes": 1398,
+      "sha256": "1509ebc5e768200ef04edeb2d6c6d279a3e889afcde1b535f29d18cad8e891ba"
+    },
+    {
+      "path": "backend/app/rules.py",
+      "bytes": 3544,
+      "sha256": "8a023c5b1b35fb0ba2e094e4788c240d6b3706e87d5e48254694493ddfda9943"
+    },
+    {
+      "path": "backend/app/service.py",
+      "bytes": 3118,
+      "sha256": "aa87a8f58b713ef31d6e5762b82ca030d9fbdd1eeb8a16b99f0a52c2e7663035"
+    },
+    {
+      "path": "backend/app/storage.py",
+      "bytes": 5235,
+      "sha256": "f0a14e180aac253d9723d3a8ebb990a204e17fa56dadcc20e367f3a0a1f9ca8b"
+    },
+    {
+      "path": "backend/requirements-dev.txt",
+      "bytes": 34,
+      "sha256": "8636f9ab1a075be9f3039e2a6471837259c4f36b625bcaf7a3d9a1edd2419c6d"
+    },
+    {
+      "path": "backend/requirements-live.txt",
+      "bytes": 40,
+      "sha256": "263d763a9c750512918c03c12c6f790a14ce7f759d9c863996bdc5c38e05ef61"
+    },
+    {
+      "path": "backend/requirements.txt",
+      "bytes": 128,
+      "sha256": "e409ab8c06140fff98d386d92b287f9cce7e96084d173f5afd127d7ba14601e5"
+    },
+    {
+      "path": "backend/tests/conftest.py",
+      "bytes": 227,
+      "sha256": "9a2859708e03e3b781f12ce5f702cad5f989767ff03b9ae9d718e8762c778779"
+    },
+    {
+      "path": "backend/tests/test_api.py",
+      "bytes": 3405,
+      "sha256": "6d1b69a272dddcbba05459c10512ac0673c53864cd556e173e8b8733339b7a2a"
+    },
+    {
+      "path": "backend/tests/test_configuration.py",
+      "bytes": 834,
+      "sha256": "ea4af15d6240e11cb6dd44ff1601949d366b71eb659b7f393835827c2dcb5c91"
+    },
+    {
+      "path": "backend/tests/test_domain.py",
+      "bytes": 2634,
+      "sha256": "91cddded36582b12db40aba796826c82c1de5d54a905e0796495c96194296b23"
+    },
+    {
+      "path": "backend/tests/test_rules.py",
+      "bytes": 1194,
+      "sha256": "8e59fd3d93b5e7e2576d5bcda12f1661ca97324eaa1b8afed9c7769ceb10035f"
+    },
+    {
+      "path": "config/universe.json",
+      "bytes": 4727,
+      "sha256": "1a380b00a5a30cfc3b119437acf1bbe19421a2ef6bdcbc367a5640182c6f8811"
+    },
+    {
+      "path": "data/.gitkeep",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "design.md",
+      "bytes": 9807,
+      "sha256": "5d8e2abff97300bbcfffe150cb1ca882d8c8c8c827f59ca64f1dac1ad1423f4a"
+    },
+    {
+      "path": "docs/API_CONTRACT.md",
+      "bytes": 5748,
+      "sha256": "f520c08117a815a6139a09257de71a9349c20a6d6257c0d4c513f303cc729b02"
+    },
+    {
+      "path": "docs/ARCHITECTURE.md",
+      "bytes": 4810,
+      "sha256": "155f7baaa0bc02cc3c22fee348ad91443f1e869dd66c7b45627d8c5e3d806e8c"
+    },
+    {
+      "path": "docs/BACKTESTING.md",
+      "bytes": 5144,
+      "sha256": "4f2cc48b8c7708c7ba9978260d89f60955d08184d4a889ae3c647742b76cb9af"
+    },
+    {
+      "path": "docs/CONFIG_DEFAULTS.md",
+      "bytes": 3255,
+      "sha256": "6e1573db2585d8a7e8d86ebe28fe1297c6076cf6cbe9a3f9d19176a5f6e04fd5"
+    },
+    {
+      "path": "docs/DATABASE_SCHEMA.md",
+      "bytes": 8058,
+      "sha256": "6109a214e5eed347af34ecd8c2cf3ed166d8b8d6f568ee2aa42b03c91ab82b04"
+    },
+    {
+      "path": "docs/DATA_CONTRACTS.md",
+      "bytes": 5653,
+      "sha256": "20ac81db1b30893afdeb8029a7230dc166e046820e8f202483fcd20a0ff0b5b6"
+    },
+    {
+      "path": "docs/DATA_PROVIDERS.md",
+      "bytes": 4409,
+      "sha256": "b4081a79a3b7ae6bc9337f944fe651535a7f2d9fe94dcf94f5f4ff030c58bf78"
+    },
+    {
+      "path": "docs/DECISIONS.md",
+      "bytes": 4356,
+      "sha256": "106a67fa9849ed06270de56a3dfc92b9820dc9d17fb3ae2050fe95bdae019708"
+    },
+    {
+      "path": "docs/DEVELOPMENT_SETUP.md",
+      "bytes": 3362,
+      "sha256": "44f5aae8bdcec44665d8a546844d27ae8f04d4ad06231e42b0de735c401b602e"
+    },
+    {
+      "path": "docs/EXPLANATION_POLICY.md",
+      "bytes": 3722,
+      "sha256": "ff21a8f64fb09eacb300fc4263d10d58c98a3ca411ced5bed525b30237f67896"
+    },
+    {
+      "path": "docs/GLOSSARY.md",
+      "bytes": 2814,
+      "sha256": "3747928de8cbd09dffb0cd2c39812a989d3e399cb7c6e4d20246daef81d521b5"
+    },
+    {
+      "path": "docs/OPEN_QUESTIONS.md",
+      "bytes": 2378,
+      "sha256": "4992976f1dbe193d0837f1b78417a3b49030eec70eb3f7c1ba3ae43537eb45f1"
+    },
+    {
+      "path": "docs/OPERATIONS.md",
+      "bytes": 4603,
+      "sha256": "dff7e150326a708fcf09d27329fe841e215c9d00dfd1b768e7091f09cadaace1"
+    },
+    {
+      "path": "docs/PREDICTION_VALIDATION.md",
+      "bytes": 5828,
+      "sha256": "a7ffaa9db53d28afe03d0f13303ff06447f6c05422b6863da68167e847ca3f6d"
+    },
+    {
+      "path": "docs/REFERENCES.md",
+      "bytes": 4386,
+      "sha256": "74c5a4fc059b4813ebcf2fc087fcd9dd614b43c6f96c94e2ff76fb963fcde62e"
+    },
+    {
+      "path": "docs/RISK_EXECUTION.md",
+      "bytes": 4644,
+      "sha256": "24ad444b1348bc475417af1fccd6b21027c8ee1472a1374f969b4f7d7ac9d747"
+    },
+    {
+      "path": "docs/ROADMAP.md",
+      "bytes": 3703,
+      "sha256": "899649a9d67854716557d1a15812b3eae4ad334b51da207f269a1ac06a442eb4"
+    },
+    {
+      "path": "docs/SCORING_RANKING.md",
+      "bytes": 6954,
+      "sha256": "f44162f311c8c4c4641c2614f077e20f735ca67fc498408d382c4c733a406ea5"
+    },
+    {
+      "path": "docs/SECURITY.md",
+      "bytes": 4118,
+      "sha256": "8f9a22b630662f2439e6995dcb6054141a01effbd46603d67d3a225773673d91"
+    },
+    {
+      "path": "docs/STRATEGY_SPEC.md",
+      "bytes": 7340,
+      "sha256": "840698111784fe2e2373f3423a78765588ef422df557d3f4608469de902b4f32"
+    },
+    {
+      "path": "docs/TASKS.md",
+      "bytes": 4290,
+      "sha256": "470c20626881daf0eb42bbb096593d2d26f1c5531155f159ebd060bb91a950a1"
+    },
+    {
+      "path": "docs/TEST_PLAN.md",
+      "bytes": 5566,
+      "sha256": "0fb8aa973af39ab776a4a453ef8e991fbf867628fab3e6e6e95e2fd1e75bd13a"
+    },
+    {
+      "path": "docs/TRACEABILITY.md",
+      "bytes": 2872,
+      "sha256": "03573c2e1f98247f67911ba3d45ea582dd0f1a3a4abb9e5b8e3a067f53e965fc"
+    },
+    {
+      "path": "docs/UNIVERSE_LIQUIDITY.md",
+      "bytes": 5561,
+      "sha256": "84917ba5dd0283992167f1e37826edfacc6b53af8f925a9b2314fd6f80156367"
+    },
+    {
+      "path": "goal.md",
+      "bytes": 4057,
+      "sha256": "58b8d86be828fd57e589e6653b924d95013c990a2a0f7d4df1f7248f2d35ac4e"
+    },
+    {
+      "path": "infra/Dockerfile",
+      "bytes": 497,
+      "sha256": "9897bf5888125a52a57a475494e0657acec9ad700feb54d757af7ab16133fea4"
+    },
+    {
+      "path": "infra/compose.yaml",
+      "bytes": 491,
+      "sha256": "285e481f03a11f830efc941817a0816e91e40a91ae80a95d2ea89952bca91943"
+    },
+    {
+      "path": "scripts/backup.py",
+      "bytes": 800,
+      "sha256": "e0e1441690741d45ce5424b2491cf4a9dc60892ded6d289997c37e23b08f1b49"
+    },
+    {
+      "path": "scripts/browser_e2e.py",
+      "bytes": 3074,
+      "sha256": "12cb6ec1448f7c8dadb474f25c5d868919c94609680e978ba33d3736f5355e52"
+    },
+    {
+      "path": "scripts/doctor.py",
+      "bytes": 2259,
+      "sha256": "4691b4c37a53f913a7b9d876ef06dc83e27ad516823361651fcecf2ce3476b75"
+    },
+    {
+      "path": "scripts/finalize_flutter.py",
+      "bytes": 1235,
+      "sha256": "541e35e0b9426f29ac20315bffd71c070404383f1eb95870d1691b2f223d92b9"
+    },
+    {
+      "path": "scripts/flutter_setup.bat",
+      "bytes": 282,
+      "sha256": "49c9354da22366db9bf72c06745b339385412d48dab7f7c5d2e31611cc5bf235"
+    },
+    {
+      "path": "scripts/flutter_setup.sh",
+      "bytes": 536,
+      "sha256": "79659b320d276c07197537eac94659e6e8ba9dff3ae8b654028cd70a5338433f"
+    },
+    {
+      "path": "scripts/launch.py",
+      "bytes": 1641,
+      "sha256": "69f4ef3c0a7024a43f6ae75ed39f1b7893d992857e8685000bd84d4bfc5b6166"
+    },
+    {
+      "path": "scripts/scan_once.py",
+      "bytes": 641,
+      "sha256": "6b0b1e546071a76d87593a74660a389f124be24c3cfaae2866a4965f1b0d1dfe"
+    },
+    {
+      "path": "scripts/server_smoke.py",
+      "bytes": 1268,
+      "sha256": "43b93fe89cb307040c90231c4cc0ce7273f904bf53e9b378f7615443882f6986"
+    },
+    {
+      "path": "scripts/start.bat",
+      "bytes": 314,
+      "sha256": "aaf3f4d0e38f61d3901ad981b2e0b2335204d871aad2e06050df045891df7f96"
+    },
+    {
+      "path": "scripts/start.sh",
+      "bytes": 451,
+      "sha256": "342651b9095dcec9cbf3fab76748180913dd6eba39bfbbd036fd4a46dcf403e8"
+    },
+    {
+      "path": "scripts/ui_smoke.py",
+      "bytes": 2998,
+      "sha256": "9fafbdb694022bb7a29144c845c709a743abd5da0680034083d9477f9915713f"
+    },
+    {
+      "path": "web/app.js",
+      "bytes": 29168,
+      "sha256": "c5168160a104d2eeb2efbe43603697abf77bb1289810be0513649b70e0932ba3"
+    },
+    {
+      "path": "web/icon-192.png",
+      "bytes": 1269,
+      "sha256": "7b22ef5decea16fd5ec5496ac7f8cea57120e6ef7a685d05eba6ca1b42645018"
+    },
+    {
+      "path": "web/icon-512.png",
+      "bytes": 3511,
+      "sha256": "74e91bc95b89869dff105fe4eb5fc4ede455884f0a140148f7bb6ddaac0e8f8e"
+    },
+    {
+      "path": "web/index.html",
+      "bytes": 2727,
+      "sha256": "d7062e867a17518337a571d7a6cea28adb789d8b2a9101a66b9563463bae7fc5"
+    },
+    {
+      "path": "web/manifest.webmanifest",
+      "bytes": 516,
+      "sha256": "b17bdffdd5bedbd99f081e606d85c9c43e83797dadb4a26b1c527a817282b16c"
+    },
+    {
+      "path": "web/preview-builder.png",
+      "bytes": 62301,
+      "sha256": "20fbb57cb0ac77e96424cc5f26ed3a060b77b73e9f5167962a9be6d22efbfa6c"
+    },
+    {
+      "path": "web/preview-desktop.png",
+      "bytes": 212247,
+      "sha256": "78deece9ae4621566c888559de8ce4ed527068de866bb1ec035c8a78f5c25e97"
+    },
+    {
+      "path": "web/preview-detail.png",
+      "bytes": 236827,
+      "sha256": "2d93544b257ab33cf0537e381b598346e8bfc86d5306aebd2c5153570fc0c014"
+    },
+    {
+      "path": "web/preview-mobile.png",
+      "bytes": 128815,
+      "sha256": "8be5b0cfe6f654980d7b68f42537f7aeda9f3215505fce6c4a5a1a5c181229bd"
+    },
+    {
+      "path": "web/styles.css",
+      "bytes": 11106,
+      "sha256": "23e87ea20bd1c8c51cbb4afce97c15a1fc889352fe2ca012197738ce2f5c6478"
+    },
+    {
+      "path": "web/sw.js",
+      "bytes": 1182,
+      "sha256": "e1ac191447acadd900353369c05346b968686da343164541bed81aff424fe86b"
+    }
+  ]
+}

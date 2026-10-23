@@ -1,0 +1,20 @@
+services:
+  swing-intelligence:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile
+    environment:
+      SWING_DATA_MODE: ${SWING_DATA_MODE:-demo}
+      SWING_HOST: 0.0.0.0
+      SWING_API_TOKEN: ${SWING_API_TOKEN:?Set a random SWING_API_TOKEN (32+ chars) when running Docker}
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - ../data:/work/data
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL

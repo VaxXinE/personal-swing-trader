@@ -1,0 +1,195 @@
+{
+  "description": "Pilot watch universe. Add instruments with unique canonical IDs. Max 250 for personal use.",
+  "instruments": [
+    {
+      "instrument_id": "US:NASDAQ:MSFT",
+      "symbol": "MSFT",
+      "name": "Microsoft",
+      "market": "US",
+      "venue": "NASDAQ",
+      "currency": "USD",
+      "provider_symbol": "MSFT",
+      "kind": "EQUITY"
+    },
+    {
+      "instrument_id": "US:NASDAQ:NVDA",
+      "symbol": "NVDA",
+      "name": "NVIDIA",
+      "market": "US",
+      "venue": "NASDAQ",
+      "currency": "USD",
+      "provider_symbol": "NVDA",
+      "kind": "EQUITY"
+    },
+    {
+      "instrument_id": "US:NASDAQ:AAPL",
+      "symbol": "AAPL",
+      "name": "Apple",
+      "market": "US",
+      "venue": "NASDAQ",
+      "currency": "USD",
+      "provider_symbol": "AAPL",
+      "kind": "EQUITY"
+    },
+    {
+      "instrument_id": "US:NASDAQ:GOOGL",
+      "symbol": "GOOGL",
+      "name": "Alphabet",
+      "market": "US",
+      "venue": "NASDAQ",
+      "currency": "USD",
+      "provider_symbol": "GOOGL",
+      "kind": "EQUITY"
+    },
+    {
+      "instrument_id": "US:NYSE:BRK-B",
+      "symbol": "BRK.B",
+      "name": "Berkshire Hathaway",
+      "market": "US",
+      "venue": "NYSE",
+      "currency": "USD",
+      "provider_symbol": "BRK-B",
+      "kind": "EQUITY"
+    },
+    {
+      "instrument_id": "US:NASDAQ:AMZN",
+      "symbol": "AMZN",
+      "name": "Amazon",
+      "market": "US",
+      "venue": "NASDAQ",
+      "currency": "USD",
+      "provider_symbol": "AMZN",
+      "kind": "EQUITY"
+    },
+    {
+      "instrument_id": "US:NASDAQ:META",
+      "symbol": "META",
+      "name": "Meta Platforms",
+      "market": "US",
+      "venue": "NASDAQ",
+      "currency": "USD",
+      "provider_symbol": "META",
+      "kind": "EQUITY"
+    },
+    {
+      "instrument_id": "US:NASDAQ:TSLA",
+      "symbol": "TSLA",
+      "name": "Tesla",
+      "market": "US",
+      "venue": "NASDAQ",
+      "currency": "USD",
+      "provider_symbol": "TSLA",
+      "kind": "EQUITY"
+    },
+    {
+      "instrument_id": "IDX:IDX:BBCA",
+      "symbol": "BBCA",
+      "name": "Bank Central Asia",
+      "market": "IDX",
+      "venue": "IDX",
+      "currency": "IDR",
+      "provider_symbol": "BBCA.JK",
+      "kind": "EQUITY"
+    },
+    {
+      "instrument_id": "IDX:IDX:BBRI",
+      "symbol": "BBRI",
+      "name": "Bank Rakyat Indonesia",
+      "market": "IDX",
+      "venue": "IDX",
+      "currency": "IDR",
+      "provider_symbol": "BBRI.JK",
+      "kind": "EQUITY"
+    },
+    {
+      "instrument_id": "IDX:IDX:BMRI",
+      "symbol": "BMRI",
+      "name": "Bank Mandiri",
+      "market": "IDX",
+      "venue": "IDX",
+      "currency": "IDR",
+      "provider_symbol": "BMRI.JK",
+      "kind": "EQUITY"
+    },
+    {
+      "instrument_id": "IDX:IDX:TLKM",
+      "symbol": "TLKM",
+      "name": "Telkom Indonesia",
+      "market": "IDX",
+      "venue": "IDX",
+      "currency": "IDR",
+      "provider_symbol": "TLKM.JK",
+      "kind": "EQUITY"
+    },
+    {
+      "instrument_id": "IDX:IDX:ASII",
+      "symbol": "ASII",
+      "name": "Astra International",
+      "market": "IDX",
+      "venue": "IDX",
+      "currency": "IDR",
+      "provider_symbol": "ASII.JK",
+      "kind": "EQUITY"
+    },
+    {
+      "instrument_id": "IDX:IDX:ICBP",
+      "symbol": "ICBP",
+      "name": "Indofood CBP",
+      "market": "IDX",
+      "venue": "IDX",
+      "currency": "IDR",
+      "provider_symbol": "ICBP.JK",
+      "kind": "EQUITY"
+    },
+    {
+      "instrument_id": "CRYPTO:BINANCE:BTCUSDT",
+      "symbol": "BTCUSDT",
+      "name": "Bitcoin / Tether",
+      "market": "CRYPTO",
+      "venue": "BINANCE",
+      "currency": "USDT",
+      "provider_symbol": "BTCUSDT",
+      "kind": "SPOT"
+    },
+    {
+      "instrument_id": "CRYPTO:BINANCE:ETHUSDT",
+      "symbol": "ETHUSDT",
+      "name": "Ethereum / Tether",
+      "market": "CRYPTO",
+      "venue": "BINANCE",
+      "currency": "USDT",
+      "provider_symbol": "ETHUSDT",
+      "kind": "SPOT"
+    },
+    {
+      "instrument_id": "CRYPTO:BINANCE:SOLUSDT",
+      "symbol": "SOLUSDT",
+      "name": "Solana / Tether",
+      "market": "CRYPTO",
+      "venue": "BINANCE",
+      "currency": "USDT",
+      "provider_symbol": "SOLUSDT",
+      "kind": "SPOT"
+    },
+    {
+      "instrument_id": "CRYPTO:BINANCE:BNBUSDT",
+      "symbol": "BNBUSDT",
+      "name": "BNB / Tether",
+      "market": "CRYPTO",
+      "venue": "BINANCE",
+      "currency": "USDT",
+      "provider_symbol": "BNBUSDT",
+      "kind": "SPOT"
+    },
+    {
+      "instrument_id": "CRYPTO:BINANCE:LINKUSDT",
+      "symbol": "LINKUSDT",
+      "name": "Chainlink / Tether",
+      "market": "CRYPTO",
+      "venue": "BINANCE",
+      "currency": "USDT",
+      "provider_symbol": "LINKUSDT",
+      "kind": "SPOT"
+    }
+  ]
+}

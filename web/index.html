@@ -1,0 +1,31 @@
+<!doctype html><html lang="id"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<meta name="theme-color" content="#090f1a"><meta name="description" content="Private swing-trading research cockpit. No trading execution."/>
+<link rel="manifest" href="/static/manifest.webmanifest" />
+<link rel="icon" type="image/png" href="/static/icon-192.png" />
+<link rel="apple-touch-icon" href="/static/icon-192.png" />
+<title>SWING / INTELLIGENCE</title><link rel="stylesheet" href="/static/styles.css" />
+</head><body>
+<div id="shell">
+  <aside class="sidebar">
+    <div class="brand"><div class="brand-icon">◈</div><div><b>SWING<span>INTEL</span></b><small>PERSONAL TRADING LAB</small></div></div>
+    <div class="nav-label">WORKSPACE</div>
+    <nav id="nav">
+      <button data-page="home" class="nav-item active"><span class="ico">⌂</span> Overview</button>
+      <button data-page="explore" class="nav-item"><span class="ico">⌕</span> Opportunity Explorer</button>
+      <button data-page="watchlist" class="nav-item"><span class="ico">☆</span> Watchlist</button>
+      <button data-page="journal" class="nav-item"><span class="ico">▤</span> Trade Journal</button>
+      <button data-page="builder" class="nav-item"><span class="ico">⚙</span> Screener Builder</button>
+      <button data-page="health" class="nav-item"><span class="ico">◉</span> Data Health</button>
+    </nav>
+    <div class="sidebar-foot"><span class="live-dot"></span><span>LOCAL / PRIVATE</span><small>Research only · No order placement</small></div>
+  </aside>
+  <div class="main-area">
+    <header class="topbar"><div class="top-caption"><span id="breadcrumb">WORKSPACE / OVERVIEW</span><b id="top-title">Market Overview</b></div><div class="top-actions"><span class="status-pill" id="mode-pill">LOADING</span><button class="small-btn" id="scan-btn">↻ Run Scan</button><button class="circle-btn" id="settings-btn" title="API credentials">⚙</button></div></header>
+    <main id="content" aria-live="polite"><div class="loader">Loading research workspace…</div></main>
+    <footer class="footer">SWING INTELLIGENCE v0.1.1 · LONG ONLY · NOT FINANCIAL ADVICE · NOT VALIDATED</footer>
+  </div>
+</div>
+<nav class="mobile-tabs"><button data-page="home" class="active">⌂<small>Home</small></button><button data-page="explore">⌕<small>Explore</small></button><button data-page="watchlist">☆<small>Watchlist</small></button><button data-page="journal">▤<small>Journal</small></button><button data-page="builder">☷<small>Builder</small></button></nav>
+<div id="modal-root"></div><div id="toast" role="status"></div>
+<script src="/static/app.js"></script></body></html>
