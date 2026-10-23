@@ -273,9 +273,15 @@ class HistoryStore:
             raise HistoryError('Invalid history lookup')
         cutoff = _timestamp(as_of) if as_of is not None else _timestamp(self._observe())
         with self._connect() as db:
-            rows = db.execute('''SELECT action_type,effective_on,revision,first_observed_at,evidence_json,content_hash
-                FROM history_actions WHERE instrument_id=? AND source=? AND first_observed_at<=?
-                ORDER BY effective_on,revision''', (instrument_id,source,_iso(cutoff))).fetchall()
+            rows = db.execute('''WITH versions AS (
+                SELECT action_type,effective_on,revision,first_observed_at,evidence_json,content_hash,
+                       ROW_NUMBER() OVER (PARTITION BY action_type,effective_on
+                                          ORDER BY revision DESC) AS rank
+                FROM history_actions
+                WHERE instrument_id=? AND source=? AND first_observed_at<=?
+            ) SELECT action_type,effective_on,revision,first_observed_at,evidence_json,content_hash
+              FROM versions WHERE rank=1 ORDER BY effective_on,action_type''',
+              (instrument_id,source,_iso(cutoff))).fetchall()
         results = []
         for r in rows:
             if sha256(r['evidence_json'].encode('utf-8')).hexdigest() != r['content_hash']:

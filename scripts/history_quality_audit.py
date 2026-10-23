@@ -10,6 +10,7 @@ sys.path.insert(0, str(ROOT / 'backend'))
 from app.config import settings
 from app.history import HistoryError, HistoryStore
 from app.history_quality import audit_snapshot, load_session_calendar
+from app.history_evidence import load_close_reference
 from app.registry import get_instruments
 
 
@@ -19,6 +20,8 @@ def main(argv=None) -> int:
     p.add_argument('--instrument-id', default='US:NASDAQ:MSFT')
     p.add_argument('--as-of', help='Archived first-observed cutoff in UTC')
     p.add_argument('--calendar', type=Path, help='Optional reviewed session-list JSON; not automatically trusted')
+    p.add_argument('--reference', type=Path, help='Optional offline source-close evidence JSON')
+    p.add_argument('--expected-evidence-sha256', help='Reject if evidence fingerprint changed')
     p.add_argument('--limit', type=int, default=2500)
     p.add_argument('--db', type=Path, default=settings.db_path.parent / 'history.sqlite')
     p.add_argument('--json', action='store_true', help='Print structured findings')
@@ -38,7 +41,10 @@ def main(argv=None) -> int:
         calendar = load_session_calendar(a.calendar, ins.market) if a.calendar else None
         actions = store.actions(ins.instrument_id, source=source,
                                 as_of=snapshot['as_of_observation'])
-        report = audit_snapshot(ins, snapshot, calendar=calendar, actions=actions)
+        reference = load_close_reference(a.reference) if a.reference else None
+        report = audit_snapshot(ins, snapshot, calendar=calendar, actions=actions, reference=reference)
+        if a.expected_evidence_sha256 and a.expected_evidence_sha256 != report['evidence_sha256']:
+            raise HistoryError('Historical evidence fingerprint mismatch')
     except (HistoryError, OSError, ValueError) as exc:
         print('Quality audit rejected: ' + str(exc), file=sys.stderr)
         return 2
@@ -47,6 +53,7 @@ def main(argv=None) -> int:
     else:
         print(f"{ins.symbol}: {report['status']} | archived_rows={report['rows']} | calendar={report['calendar_coverage']}")
         print(f"finding_counts={report['finding_counts']}")
+        print(f"evidence_sha256={report['evidence_sha256']}")
         print('calendar_validated=false | corporate_actions_verified=false | point_in_time_validated=false')
     return 2 if report['status'] == 'BLOCKED' else 0
 

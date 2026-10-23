@@ -59,3 +59,19 @@ Offline tests exercise normal archive, missing session, duplicate/out-of-scope c
 ## Website display
 
 Archived Backtest modal now surfaces the research quality-gate status, calendar coverage, and finding counts. The label `STRUCTURAL_PASS` does not imply a certified exchange calendar or corporate-action adjustment. Blocking issues return an API 422 with a reviewable error instead of drawing a fabricated performance report.
+
+
+## Historical evidence reconciliation (2026-10-23)
+
+Offline quality audit can now compare a **user-provided second-provider close series** with the archived series using `--reference /absolute/path/closes.json`. The bounded JSON contract is `instrument_id`, `source`, `price_basis`, `currency`, `observed_at`, and `candles` (up to 2500 strictly increasing `session_date` and positive decimal-string `close`). A valid input still has `independent_source_verified=false`; its claimed vendor and observation time are **not independently authenticated**. No request is made to the named provider.
+
+```sh
+python scripts/history_quality_audit.py --mode demo \
+  --instrument-id US:NASDAQ:MSFT --reference /private/research/msft-second-source.json --json
+```
+
+The report's `evidence_sha256` fingerprints the selected archived candle revisions, calendar document, reference file content and as-of corporate-action evidence. Save it and pass `--expected-evidence-sha256 DIGEST` to reject later accidental evidence changes. This digest is not a signature and must be retained outside the writable archive if tamper detection matters.
+
+Calendar and reference `observed_at` dates later than the selected archive snapshot cutoff now **BLOCK** reconciliation, rather than being silently treated as known at that time. Corporate-action reads now return **the latest revision observed by the requested cutoff**, preserving a reproducible historical view.
+
+The feature is additive and offline: no new dependencies, network permissions, price adjustments, exchange-calendar certification or automated execution. The macOS XProtect popup remains unresolved.

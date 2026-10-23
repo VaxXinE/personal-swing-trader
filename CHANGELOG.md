@@ -1,3 +1,10 @@
+## 2026-10-23 — Historical evidence reconciliation v1 (TSK-012 partial)
+
+- Add bounded local second-source close evidence reader and optional CLI comparison without downloading or trusting a vendor claimed by the file.
+- Reject calendar/reference evidence claiming to be observed after the archived cutoff; fingerprint candles, evidence, calendar and as-of action revisions.
+- Correct archived corporate-action reads to return only the latest revision observed by the requested snapshot cutoff.
+- Apply anti-slop/ponytail principles from reviewed upstream sources without installing executable hooks or new dependencies; keep all results research-only.
+
 ## 2026-10-23 — Research historical-quality gate (TSK-007/008/012 partial)
 
 - Expose archived-replay quality gate summary and calendar certification limitations in the existing web asset-detail modal, with HTML-escaped values.

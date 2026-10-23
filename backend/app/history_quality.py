@@ -15,7 +15,7 @@ from typing import Mapping
 from zoneinfo import ZoneInfo
 
 from .domain import Instrument, Candle, validate_candles
-from .history import HistoryError, _session, _timestamp
+from .history import HistoryError, _session, _timestamp, _digest
 
 MAX_CALENDAR_BYTES = 512 * 1024
 MAX_CALENDAR_SESSIONS = 5000
@@ -168,6 +168,8 @@ def audit_snapshot(instrument: Instrument, snapshot: Mapping, *,
         calendar_details = {'source': calendar.source, 'observed_at': calendar.observed_at,
                             'sha256': calendar.sha256, 'coverage_start': calendar.coverage_start.isoformat(),
                             'coverage_end': calendar.coverage_end.isoformat()}
+        if _timestamp(calendar.observed_at) > cutoff:
+            add('CALENDAR_EVIDENCE_AFTER_SNAPSHOT', 'BLOCK')
         if seen_dates:
             first, last = min(seen_dates), max(seen_dates)
             if first < calendar.coverage_start or last > calendar.coverage_end:
@@ -200,10 +202,19 @@ def audit_snapshot(instrument: Instrument, snapshot: Mapping, *,
             raise HistoryError('Independent reference must match instrument and price basis but have different source')
         if reference.get('currency') is not None and reference['currency'] != instrument.currency:
             raise HistoryError('Reference currency mismatch; provide explicit as-of FX conversion')
+        if reference.get('observed_at') is not None and _timestamp(reference['observed_at']) > cutoff:
+            add('REFERENCE_EVIDENCE_AFTER_SNAPSHOT', 'BLOCK')
         ref_rows = reference.get('candles')
         if not isinstance(ref_rows, list) or len(ref_rows)>2500:
             raise HistoryError('Invalid independent reference rows')
-        mapped = {r['session_date']: r['candle']['close'] for r in ref_rows}
+        mapped = {}
+        for item in ref_rows:
+            if not isinstance(item, dict) or not isinstance(item.get('candle'), dict):
+                raise HistoryError('Malformed independent reference row')
+            session = _date(item.get('session_date'))
+            if session.isoformat() in mapped:
+                raise HistoryError('Duplicate independent reference session')
+            mapped[session.isoformat()] = item['candle'].get('close')
         compared = 0
         for row in records:
             key = row['session_date']
@@ -222,7 +233,24 @@ def audit_snapshot(instrument: Instrument, snapshot: Mapping, *,
         if compared == 0:
             add('REFERENCE_HAS_NO_OVERLAP', 'REVIEW')
 
-    return {'status': 'BLOCKED' if has_blocker else 'REVIEW_REQUIRED' if has_review else 'STRUCTURAL_PASS',
+    # Evidence identity includes the selected observation versions and any external inputs.
+    source_hash = (reference.get('sha256') or _digest(reference)) if reference is not None else None
+    evidence_hash = _digest({
+        'instrument_id': instrument.instrument_id,
+        'as_of_observation': snapshot['as_of_observation'],
+        'source': snapshot.get('source'),
+        'price_basis': snapshot.get('price_basis'),
+        'candles': [
+            {'session_date': r['session_date'], 'revision': r['revision'],
+             'first_observed_at': r['first_observed_at'], 'sha256': r['sha256']}
+            for r in records
+        ],
+        'calendar_sha256': calendar.sha256 if calendar else None,
+        'reference_sha256': source_hash,
+        'actions': actions or [],
+    })
+    return {'evidence_sha256': evidence_hash, 'source_evidence_sha256': source_hash,
+            'status': 'BLOCKED' if has_blocker else 'REVIEW_REQUIRED' if has_review else 'STRUCTURAL_PASS',
             'research_only': True, 'execution_verified': False, 'point_in_time_validated': False,
             'corporate_actions_verified': False, 'calendar_validated': False,
             'instrument_id': instrument.instrument_id, 'price_basis': snapshot.get('price_basis'),
