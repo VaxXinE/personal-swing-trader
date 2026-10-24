@@ -64,3 +64,31 @@ them as an untouched validation sample. Any future strategy amendment needs
 a declared hypothesis, separate chronological evaluation, corporate-action
 review, and comparison with an unchanged baseline; all claims remain
 `RESEARCH_ONLY`.
+
+
+## Observed real-provider baseline — run 40127182684
+
+[GitHub Actions, 25 October 2026](https://github.com/VaxXinE/personal-swing-trader/actions/runs/40127182684)
+replayed the unchanged PULLBACK and BREAKOUT strategies on seven provider-reported
+series captured on ephemeral CI runners for 1 April 2025 through 20 October
+2026 (IDX data starts 8 April 2025). Every source passed the structural
+quality gate, with a narrowly reviewed March 2026 exchange closure in IDX.
+
+| Instrument | Eligible signal bars per strategy | PULLBACK: only `RR_BELOW_MIN` | BREAKOUT: only `RR_BELOW_MIN` | Qualified setups / completed trades |
+| --- | ---: | ---: | ---: | ---: |
+| MSFT | 171 | 6 | 0 | 0 / 0 |
+| NVDA | 171 | 9 | 0 | 0 / 0 |
+| AAPL | 171 | 7 | 0 | 0 / 0 |
+| BBCA | 148 | 8 | 0 | 0 / 0 |
+| BBRI | 148 | 2 | 1 | 0 / 0 |
+| BTCUSDT | 348 | 12 | 0 | 0 / 0 |
+| ETHUSDT | 348 | 30 | 0 | 0 / 0 |
+| **Total** | **1,505** | **74** | **1** | **0 / 0** |
+
+The `RR_BELOW_MIN`-only counter is a **diagnostic exclusion**, not a
+counterfactual trade count. Even if that constraint were changed, the research
+gate, next-bar fills, and outcomes would still need separate evaluation.
+Most other failed bars have **multiple simultaneous** setup rejections.
+These seven assets were not sampled as a complete historic/delisted universe;
+the result is not an objective strategy-wide performance estimate. Do not
+tune and retest the same data claiming independent out-of-sample validation.
