@@ -39,6 +39,11 @@ def summarize_replay(result: dict) -> dict:
         'research_gate_passed': d['research_gate_passed'],
         'completed_trades': trades,
         'overlap_skipped_bars': d['overlap_skipped_bars'],
+        'unique_setup_rejected_bars': d.get('unique_setup_rejected_bars'),
+        'exclusive_setup_rejections': d.get('exclusive_setup_rejections', {}),
+        'top_rejection_combinations': dict(sorted(
+            d.get('setup_rejection_combinations', {}).items(),
+            key=lambda pair: (-pair[1], pair[0]))[:5]),
         'development_samples': result['development']['samples'],
         'holdout_samples': result['holdout']['samples'],
         'metrics_status': result['metrics']['status'],
@@ -129,6 +134,11 @@ def main(argv=None) -> int:
                   f"qualified={item['qualified_setups']} gate={item['research_gate_passed']} "
                   f"trades={item['completed_trades']} holdout={item['holdout_samples']} "
                   f"bottleneck={item['bottleneck']}")
+            if item['exclusive_setup_rejections']:
+                print(f"  exclusive_setup_rejections: {item['exclusive_setup_rejections']}")
+            if item['top_rejection_combinations']:
+                print(f"  top_rejection_combinations: {item['top_rejection_combinations']} "
+                      '(disjoint per signal)')
             for stage, reasons in item['rejections'].items():
                 if reasons:
                     top = sorted(reasons.items(), key=lambda entry: (-entry[1], entry[0]))[:5]

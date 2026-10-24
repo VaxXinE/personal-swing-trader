@@ -1,3 +1,9 @@
+## 2026-10-25 — Exact technical rejection combinations (TSK-027 partial)
+
+- Trace per-signal *disjoint* rejection combinations and exclusive one-reason failures, so multi-label reasons do not overstate how many bars were rejected.
+- Surface top five combinations in both-strategy research diagnostics and CI, with stable lexical ties and no change to targets, stops, fees, entry rules, or validation status.
+- Add tests for funnel arithmetic and single-failure interpretation. No data redistribution, new dependencies, strategy fitting, or trade execution.
+
 ## 2026-10-25 — Real-provider strategy diagnostics baseline
 
 - Record seven-market, both-strategy provider CI results (3,045 archived candles, 1,505 eligible bars for each strategy, zero qualified setups) and observed rejection reasons with a traceable GitHub Actions run URL.

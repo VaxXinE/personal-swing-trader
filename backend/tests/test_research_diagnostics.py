@@ -97,3 +97,40 @@ def test_cli_prints_two_strategies_and_rejects_wrong_pin(tmp_path, capsys):
                  '--instrument-id', ins.instrument_id,
                  '--expected-snapshot-sha256', '0' * 64]) == 2
     assert 'fingerprint' in capsys.readouterr().err
+
+
+def test_exact_reason_sets_do_not_double_count_one_signal(tmp_path):
+    store, ins = fixture_archive(tmp_path)
+    from app.backtest import replay
+    from app.domain import Candle
+
+    snapshot = store.read(ins.instrument_id, source='SYNTHETIC_FIXTURE',
+                          price_basis='SYNTHETIC')
+    bars = [Candle(**row['candle']) for row in snapshot['candles']]
+    for strategy in ('PULLBACK', 'BREAKOUT'):
+        result = replay(ins, bars, strategy=strategy)
+        diag = result['diagnostics']
+        rejected = diag['unique_setup_rejected_bars']
+        assert rejected == sum(diag['setup_rejection_combinations'].values())
+        assert rejected + diag['qualified_setups'] == diag['eligible_signal_bars']
+        assert sum(diag['exclusive_setup_rejections'].values()) <= rejected
+        assert all('|'.join(sorted(k.split('|'))) == k for k in
+                   diag['setup_rejection_combinations'])
+        report = summarize_replay(result)
+        assert report['unique_setup_rejected_bars'] == rejected
+        assert len(report['top_rejection_combinations']) <= 5
+        assert sum(report['top_rejection_combinations'].values()) <= rejected
+
+
+def test_research_summary_reports_exclusive_failure_without_false_profit_claims():
+    fixture = fake_result(qualified=0, trades=0)
+    fixture['diagnostics']['unique_setup_rejected_bars'] = 20
+    fixture['diagnostics']['exclusive_setup_rejections'] = {'RR_BELOW_MIN': 3}
+    fixture['diagnostics']['setup_rejection_combinations'] = {
+        'RR_BELOW_MIN': 3, 'PULLBACK_NOT_NEAR_SUPPORT|RR_BELOW_MIN': 17}
+    report = summarize_replay(fixture)
+    assert report['exclusive_setup_rejections'] == {'RR_BELOW_MIN': 3}
+    assert report['top_rejection_combinations'] == {
+        'PULLBACK_NOT_NEAR_SUPPORT|RR_BELOW_MIN': 17, 'RR_BELOW_MIN': 3}
+    assert report['net_expectancy_r'] is None
+    assert report['bottleneck'] == 'TECHNICAL_SETUP'

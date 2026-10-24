@@ -68,6 +68,8 @@ def replay(ins: Instrument, bars: list[Candle], strategy: str = 'PULLBACK',
     nonoverlap_skip = 0
     examined_signal_bars = 0
     setup_rejected = Counter()
+    rejection_sets = Counter()
+    exclusive_setup_rejected = Counter()
     gate_rejected = Counter()
     entry_rejected = Counter()
     next_eligible_signal = MIN_WARMUP
@@ -84,6 +86,10 @@ def replay(ins: Instrument, bars: list[Candle], strategy: str = 'PULLBACK',
             # Count each failed check independently. These are NOT disjoint buckets.
             reasons = setup.get('reason_codes') or ['NOT_QUALIFIED_UNSPECIFIED']
             setup_rejected.update(dict.fromkeys(reasons, 1))
+            labels = tuple(sorted(set(reasons)))
+            rejection_sets['|'.join(labels)] += 1
+            if len(labels) == 1:
+                exclusive_setup_rejected[labels[0]] += 1
             continue
         candidate_count += 1
         historical_liquidity = liquidity(ins, prefix, f, None)['historical']
@@ -175,6 +181,9 @@ def replay(ins: Instrument, bars: list[Candle], strategy: str = 'PULLBACK',
             'completed_trades': len(results),
             'overlap_skipped_bars': nonoverlap_skip,
             'setup_rejection_reasons': dict(sorted(setup_rejected.items())),
+            'unique_setup_rejected_bars': sum(rejection_sets.values()),
+            'exclusive_setup_rejections': dict(sorted(exclusive_setup_rejected.items())),
+            'setup_rejection_combinations': dict(sorted(rejection_sets.items())),
             'research_gate_rejection_reasons': dict(sorted(gate_rejected.items())),
             'entry_rejection_reasons': dict(sorted(entry_rejected.items())),
             'note': 'Rejection reasons may overlap per signal; counts are diagnostic, not calibrated probabilities.',

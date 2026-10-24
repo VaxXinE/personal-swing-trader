@@ -40,3 +40,27 @@ out-of-sample walk-forward and cost-sensitivity testing.
 Coding approach: apply upstream Anti-Slop comment hygiene and Ponytail's
 minimal-diff/default-standard-library guidance; no installer or executable
 third-party hooks.
+
+
+## Exact rejection combinations (2026-10-25)
+
+Each evaluated signal that fails technical qualification now increments one **exclusive**
+combination bucket (sorted `|`-separated reason codes) alongside the existing,
+overlapping per-reason counters. The public replay diagnostics include
+`unique_setup_rejected_bars`, `exclusive_setup_rejections`, and
+`setup_rejection_combinations`. The research CLI prints the five most frequent
+combinations, not an unbounded arbitrary probability distribution.
+
+These diagnostic identities must hold: `unique_setup_rejected_bars +
+qualified_setups == eligible_signal_bars` and `sum(combinations.values()) ==
+unique_setup_rejected_bars`. Exclusive `RR_BELOW_MIN` counts reveal when
+risk/reward was the **only** rejection reason; frequent `RR_BELOW_MIN` alone
+cannot establish that relaxing the threshold would produce safe entries.
+
+The March/October 2026 pilot covered 7 provider-reported symbols and yielded
+zero qualified PULLBACK/BREAKOUT setups despite 1,505 evaluated signal bars
+per strategy. Do not optimize thresholds on those same assets and then describe
+them as an untouched validation sample. Any future strategy amendment needs
+a declared hypothesis, separate chronological evaluation, corporate-action
+review, and comparison with an unchanged baseline; all claims remain
+`RESEARCH_ONLY`.
