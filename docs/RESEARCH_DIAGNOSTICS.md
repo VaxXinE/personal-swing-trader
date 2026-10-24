@@ -100,3 +100,8 @@ Backtest V2 now reports `diagnostics.signal_periods` in every replay, and `resea
 The sum of EARLY+LATE funnels and disjoint combinations must equal the unchanged global funnel. Indicators always use historical prefixes, not a new indicator reset at the window boundary. A simulated trade can exit after the window containing its signal, but its diagnostic attribution remains on that original signal date. The existing 75/25 development/holdout partition is unchanged.
 
 **Not an untouched OOS test:** these same 2025–2026 vendor histories were already inspected before adding periods. The split is strictly an *exploratory stability diagnostic*, and `validated`, `point_in_time_validated`, and `execution_verified` remain false. Zero trades cannot support walk-forward returns, profitability, fee-sensitivity metrics, confidence bands or minimum-sample claims. Any prospective validation requires a frozen universe, rules, exchange calendars, fees and independent later observations **before** examining that period.
+
+
+### Seven-asset observed time-window baseline
+
+For the real-data run on commit `78ded744`, all seven assets produced 0 qualified PULLBACK and BREAKOUT setups in **both** EARLY and LATE. The audited table and representative disjoint rejection combinations are recorded in [Real-market Period Stability](REAL_MARKET_PERIOD_STABILITY.md). This is a retrospective result, not untampered OOS validation.
