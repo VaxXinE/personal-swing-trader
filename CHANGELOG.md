@@ -1,3 +1,8 @@
+## 2026-10-25 — Real-provider strategy diagnostics baseline
+
+- Record seven-market, both-strategy provider CI results (3,045 archived candles, 1,505 eligible bars for each strategy, zero qualified setups) and observed rejection reasons with a traceable GitHub Actions run URL.
+- Preserve unchanged strategy thresholds and research-only interpretation; no candidate cherry-picking, price redistribution or future-looking parameter tuning.
+
 ## 2026-10-25 — Zero-trade real-data research diagnostics (TSK-027 partial)
 
 - Add offline dual-strategy archived snapshot funnel diagnosis with pinned observation cutoff, candle digest, and universe-evidence digest; report technical, research gate and next-bar entry rejection counts separately.

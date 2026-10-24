@@ -217,3 +217,6 @@ IDX March 2026 historical holiday exception: the 17→25 March BBCA gap matches 
 ### Real-data strategy funnel
 
 After an explicit LIVE historical capture, use `python scripts/research_diagnostics.py --mode live --instrument-id US:NASDAQ:MSFT --json` to compare PULLBACK and BREAKOUT over the same archived snapshot. The research CI runs this on seven US/IDX/crypto datasets and reports multi-label setup, risk-gate and hypothetical next-bar-entry rejections. `trades=0` is data scarcity, not evidence of a successful or failed trading strategy. [Research Diagnostics](docs/RESEARCH_DIAGNOSTICS.md).
+
+
+Baseline from the seven real-provider research jobs: [2026-10-25 real-market rejection funnel](docs/REAL_MARKET_FUNNEL_BASELINE.md). All 14 fixed strategy/asset combinations had zero qualified setups, with documented overlapping reason counts. This is an audit outcome, not a reason to weaken rules or claim strategy performance.
