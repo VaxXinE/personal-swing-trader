@@ -44,12 +44,31 @@ jobs:
             --instrument-id "$INSTRUMENT_ID" \
             --start-date 2025-10-01 --end-date 2026-10-20 \
             --db "$DB_FILE"
+          set +e
           python scripts/history_quality_audit.py \
             --mode live --instrument-id "$INSTRUMENT_ID" \
-            --db "$DB_FILE"
-          python scripts/archive_backtest.py \
-            --mode live --instrument-id "$INSTRUMENT_ID" \
-            --strategy PULLBACK --db "$DB_FILE"
+            --db "$DB_FILE" --json > "${RUNNER_TEMP}/quality-report.json"
+          AUDIT_EXIT=$?
+          set -e
+          AUDIT_EXIT="$AUDIT_EXIT" python - <<'PY'
+          import json
+          import os
+          with open(os.environ['RUNNER_TEMP'] + '/quality-report.json', encoding='utf-8') as f:
+              report = json.load(f)
+          status = report['status']
+          exit_code = int(os.environ['AUDIT_EXIT'])
+          assert (status == 'BLOCKED') == (exit_code == 2), (status, exit_code)
+          assert exit_code in (0, 2), (status, exit_code)
+          print(f"REAL_PROVIDER_QUALITY status={status} findings={report['finding_counts']}")
+          print(f"evidence_sha256={report['evidence_sha256']}")
+          PY
+          if [[ "$AUDIT_EXIT" -eq 0 ]]; then
+            python scripts/archive_backtest.py \
+              --mode live --instrument-id "$INSTRUMENT_ID" \
+              --strategy PULLBACK --db "$DB_FILE"
+          else
+            echo "BACKTEST_SKIPPED: data quarantined pending an exchange-calendar review."
+          fi
           python - <<'PY'
           import os
           import sqlite3
@@ -65,5 +84,12 @@ jobs:
           print(f"REAL_PROVIDER_CAPTURE_OK market={os.environ['MARKET']} "
                 f"source={source} price_basis={basis} rows={count} "
                 f"first_session={first} last_session={last}")
+          from datetime import date
+          sessions = [date.fromisoformat(r[0]) for r in db.execute(
+              'SELECT session_date FROM history_candles WHERE instrument_id=? ORDER BY session_date',
+              (os.environ['INSTRUMENT_ID'],))]
+          for previous, current in zip(sessions, sessions[1:]):
+              if (current - previous).days > 7:
+                  print(f"LONG_GAP_REQUIRES_REVIEW previous_session={previous} next_session={current}")
           print("RESEARCH_ONLY; live trades=DISABLED; output SQLite kept on ephemeral CI runner")
           PY
