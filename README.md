@@ -204,3 +204,8 @@ Research-only cross-source reconciliation: `python scripts/history_quality_audit
 ## Observed candidate universe (TSK-013 partial)
 
 Current registry/discovery samples cannot prove who was listed historically. You can explicitly archive **current sampled membership** without a network request via `python scripts/universe_capture.py --mode demo`; Archived Backtest now reports per-bar `UNKNOWN_BEFORE_OBSERVATION`, `OBSERVED_CANDIDATE` and `UNKNOWN_NOT_IN_SAMPLE` counts and a separately pinnable universe evidence fingerprint. Nothing here certifies IPO/delisting timelines or removes survivorship bias. See [Historical Universe](docs/HISTORICAL_UNIVERSE.md).
+
+
+## Test genuine internet market data (research only)
+
+Use the opt-in [real market research GitHub Actions workflow](https://github.com/VaxXinE/personal-swing-trader/actions/workflows/real-market-research.yml) to check a real, bounded historical slice of MSFT (US), BBCA (IDX), and BTCUSDT (Binance Spot) on an isolated runner. It uses the existing LIVE providers rather than generating synthetic candles, and stores no third-party prices in Git or public Actions artifacts. To persist data locally, run the explicit `history_ingest.py --mode live --allow-live --instrument-id ... --start-date ... --end-date ...` commands documented in [Historical Data Engine](docs/HISTORICAL_DATA_ENGINE.md). Genuine provider data remains `VENDOR_UNVERIFIED` and backtests remain `RESEARCH_ONLY`.

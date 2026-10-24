@@ -70,3 +70,27 @@ python scripts/history_ingest.py --mode live --allow-live --instrument-id US:NAS
 ```
 
 Dates are inclusive, must be valid `YYYY-MM-DD`, no future dates, and windows must be at most ten years; the 2,500-bar archive limit still applies. The equity adapter requests a fixed Yahoo symbol from the registry; the crypto adapter uses a fixed Binance origin, `follow_redirects=False`, spot-market checks, max four 1,000-row pages, and a fail-closed final-candle guard. A chosen historical window **does not prove price-basis/adjustment correctness, historical release time, or official session calendar completeness**. Mock-only contract tests confirm date-window rejection, provider origin allowlist, and final-candle filtering.
+
+
+## Real internet market data: reproducible opt-in research check (2026-10-25)
+
+Existing `history_ingest.py --mode live --allow-live` already connects to Yahoo Finance (US, IDX) and Binance public Spot APIs (crypto). The new [real-market-research workflow](../.github/workflows/real-market-research.yml) runs a bounded, provider-network verification on GitHub-hosted runners for `US:NASDAQ:MSFT`, `IDX:IDX:BBCA`, and `CRYPTO:BINANCE:BTCUSDT`. It is triggered by `workflow_dispatch` or by changes to the workflow/provider code on `main`. The database is ephemeral and **no vendor OHLCV is committed, cached, or uploaded as a public artifact**, as Yahoo Finance data rights are restricted. Only row counts, date range, source/basis and research test diagnostics appear in public CI logs.
+
+```sh
+# After explicitly installing research-only dependencies locally:
+python -m pip install -r backend/requirements-live.txt
+# Market data for a fixed, historic interval; note the explicit provider opt-in:
+python scripts/history_ingest.py --mode live --allow-live --instrument-id US:NASDAQ:MSFT \
+  --start-date 2025-10-01 --end-date 2026-10-20
+python scripts/history_ingest.py --mode live --allow-live --instrument-id IDX:IDX:BBCA \
+  --start-date 2025-10-01 --end-date 2026-10-20
+python scripts/history_ingest.py --mode live --allow-live --instrument-id CRYPTO:BINANCE:BTCUSDT \
+  --start-date 2025-10-01 --end-date 2026-10-20
+
+python scripts/history_quality_audit.py --mode live --instrument-id US:NASDAQ:MSFT --json
+python scripts/archive_backtest.py --mode live --instrument-id CRYPTO:BINANCE:BTCUSDT --strategy PULLBACK
+```
+
+The archive keeps research LIVE records under `VENDOR_UNVERIFIED`, **separate from all DEMO `SYNTHETIC` records**, including when sharing the same SQLite file. Quality failures must be reviewed, not auto-repaired. Yahoo uses a third-party unofficial client and may be rate-limited or blocked; a failed network capture means **no provider evidence was obtained**, not 0-volume market data. Official Binance public endpoint: https://data-api.binance.vision (no key). `yfinance` is for personal/research use; confirm your usage rights before any redistribution, vendor data export or commercial service. Spot-only does not apply to broker trade fills.
+
+This internet data is *genuine provider-reported research data*, but **historical adjusted-price basis, first market publication time, delisted-universe coverage, exchange sessions and execution remain unverified**. Preserve `RESEARCH_ONLY` and `validated:false`; no actual position is opened. The macOS alert remains a separate issue; tests are executed on cloud runners instead of the affected machine, without bypassing its protections.

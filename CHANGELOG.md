@@ -1,3 +1,11 @@
+## 2026-10-25 — Real internet market research verification
+
+- Add opt-in / provider-change-triggered GitHub-hosted market-data smoke checks for genuine MSFT, BBCA.JK and BTCUSDT daily bars over 2025-10-01 to 2026-10-20.
+- Reuse existing bounded LIVE ingestion, offline quality audit, and archived replay; no extra provider wrapper, extra database schema, broker connection or trading.
+- Do not publish or commit Yahoo Finance prices in a public repo; keep captured research archives ephemeral on CI runners.
+- Document how to capture separate VENDOR_UNVERIFIED data in a user's own local history.sqlite with explicit consent.
+- Apply anti-slop and ponytail guidance: narrow scope, reuse current code, no third-party agent hook or installer.
+
 ## 2026-10-24 — Historical candidate-universe observations (TSK-013 partial)
 
 - Persist bounded, immutable *observed candidate* registry snapshots in the existing historical SQLite archive via a separate offline CLI; use actual observation times rather than invented historical listing dates.

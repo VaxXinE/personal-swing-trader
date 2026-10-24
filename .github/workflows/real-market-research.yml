@@ -1,0 +1,69 @@
+name: Real market data research verification
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/real-market-research.yml
+      - scripts/history_ingest.py
+      - backend/app/history_sources.py
+
+permissions:
+  contents: read
+
+jobs:
+  verify-real-provider:
+    name: Research ${{ matrix.market }} / ${{ matrix.symbol }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {market: US, symbol: MSFT, instrument: 'US:NASDAQ:MSFT'}
+          - {market: IDX, symbol: BBCA, instrument: 'IDX:IDX:BBCA'}
+          - {market: CRYPTO, symbol: BTCUSDT, instrument: 'CRYPTO:BINANCE:BTCUSDT'}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install reviewed research dependencies
+        run: python -m pip install -r backend/requirements-live.txt
+      - name: Capture real provider candles and audit without trading
+        env:
+          INSTRUMENT_ID: ${{ matrix.instrument }}
+          MARKET: ${{ matrix.market }}
+          DB_FILE: ${{ runner.temp }}/verified-research-${{ matrix.market }}.sqlite
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/history_ingest.py \
+            --mode live --allow-live \
+            --instrument-id "$INSTRUMENT_ID" \
+            --start-date 2025-10-01 --end-date 2026-10-20 \
+            --db "$DB_FILE"
+          python scripts/history_quality_audit.py \
+            --mode live --instrument-id "$INSTRUMENT_ID" \
+            --db "$DB_FILE"
+          python scripts/archive_backtest.py \
+            --mode live --instrument-id "$INSTRUMENT_ID" \
+            --strategy PULLBACK --db "$DB_FILE"
+          python - <<'PY'
+          import os
+          import sqlite3
+          db = sqlite3.connect(os.environ['DB_FILE'])
+          rows = db.execute(
+              "SELECT source, price_basis, COUNT(*), MIN(session_date), MAX(session_date) "
+              "FROM history_candles WHERE instrument_id=? GROUP BY source, price_basis",
+              (os.environ['INSTRUMENT_ID'],)
+          ).fetchall()
+          assert len(rows) == 1 and rows[0][0] != 'SYNTHETIC_FIXTURE', rows
+          source, basis, count, first, last = rows[0]
+          assert basis == 'VENDOR_UNVERIFIED' and count >= 225, rows
+          print(f"REAL_PROVIDER_CAPTURE_OK market={os.environ['MARKET']} "
+                f"source={source} price_basis={basis} rows={count} "
+                f"first_session={first} last_session={last}")
+          print("RESEARCH_ONLY; live trades=DISABLED; output SQLite kept on ephemeral CI runner")
+          PY
