@@ -73,12 +73,25 @@ def replay(ins: Instrument, bars: list[Candle], strategy: str = 'PULLBACK',
     gate_rejected = Counter()
     entry_rejected = Counter()
     next_eligible_signal = MIN_WARMUP
+    end = max(MIN_WARMUP, n - horizon)
+    midpoint = MIN_WARMUP + (end - MIN_WARMUP) // 2
+    periods = {
+        label: {'start': start, 'end': stop, 'eligible': 0, 'qualified': 0,
+                'gate': 0, 'trades': 0, 'skipped': 0, 'setup': Counter(),
+                'exclusive': Counter(), 'combinations': Counter(),
+                'research': Counter(), 'entry': Counter()}
+        for label, start, stop in (
+            ('EARLY', MIN_WARMUP, midpoint), ('LATE', midpoint, end))
+    }
 
-    for i in range(MIN_WARMUP, max(MIN_WARMUP, n - horizon)):
+    for i in range(MIN_WARMUP, end):
+        period = periods['EARLY' if i < midpoint else 'LATE']
         if i < next_eligible_signal:
             nonoverlap_skip += 1
+            period['skipped'] += 1
             continue
         examined_signal_bars += 1
+        period['eligible'] += 1
         prefix = bars[:i + 1]
         f = calculate_features(prefix)
         setup = detect_strategy(ins, prefix, f, strategy)
@@ -86,27 +99,36 @@ def replay(ins: Instrument, bars: list[Candle], strategy: str = 'PULLBACK',
             # Count each failed check independently. These are NOT disjoint buckets.
             reasons = setup.get('reason_codes') or ['NOT_QUALIFIED_UNSPECIFIED']
             setup_rejected.update(dict.fromkeys(reasons, 1))
+            period['setup'].update(dict.fromkeys(reasons, 1))
             labels = tuple(sorted(set(reasons)))
             rejection_sets['|'.join(labels)] += 1
+            period['combinations']['|'.join(labels)] += 1
             if len(labels) == 1:
                 exclusive_setup_rejected[labels[0]] += 1
+                period['exclusive'][labels[0]] += 1
             continue
         candidate_count += 1
+        period['qualified'] += 1
         historical_liquidity = liquidity(ins, prefix, f, None)['historical']
         gate = evaluate_research_gate(setup, historical_liquidity, f['atr_14'])
         if gate['status'] != 'PASS':
             # Separate research-gate failures from technical setup failures.
-            gate_rejected.update(dict.fromkeys(gate.get('reason_codes') or [f"GATE_{gate['status']}"], 1))
+            reasons = dict.fromkeys(gate.get('reason_codes') or [f"GATE_{gate['status']}"], 1)
+            gate_rejected.update(reasons)
+            period['research'].update(reasons)
             continue
         gate_pass_count += 1
+        period['gate'] += 1
         entry, stop, target = setup['entry'], setup['stop'], setup['target']
         if not all(isfinite(v) for v in (entry, stop, target)) or not target > entry > stop > 0:
             entry_rejected['INVALID_GEOMETRY'] += 1
+            period['entry']['INVALID_GEOMETRY'] += 1
             continue
         nextbar = bars[i + 1]
         atr = f['atr_14']
         if nextbar.open > entry + 0.5 * atr:
             entry_rejected['CHASE_GAP_REJECTED'] += 1
+            period['entry']['CHASE_GAP_REJECTED'] += 1
             continue  # reject chase gaps, never assume fill at the stale trigger
         if nextbar.open >= entry:
             fill = nextbar.open
@@ -114,9 +136,11 @@ def replay(ins: Instrument, bars: list[Candle], strategy: str = 'PULLBACK',
             fill = entry  # same-bar sequencing ambiguous; STOP takes precedence
         else:
             entry_rejected['ENTRY_NOT_TOUCHED'] += 1
+            period['entry']['ENTRY_NOT_TOUCHED'] += 1
             continue  # one-session limit/stop research entry; unfilled is skipped
         if fill >= target:
             entry_rejected['FILL_AT_OR_ABOVE_TARGET'] += 1
+            period['entry']['FILL_AT_OR_ABOVE_TARGET'] += 1
             continue
         # Conservative fill-denominator: apply modeled entry + exit friction on
         # both profitable trades and stops, and model adverse opening gaps.
@@ -125,6 +149,7 @@ def replay(ins: Instrument, bars: list[Candle], strategy: str = 'PULLBACK',
         initial_risk = invested - modeled_stop
         if not initial_risk > 0:
             entry_rejected['NONPOSITIVE_RISK'] += 1
+            period['entry']['NONPOSITIVE_RISK'] += 1
             continue
         outcome = 'TIMEOUT'
         exit_index = i + horizon
@@ -147,8 +172,10 @@ def replay(ins: Instrument, bars: list[Candle], strategy: str = 'PULLBACK',
         net_r = (proceeds - invested) / initial_risk
         if not isfinite(net_r):
             entry_rejected['NONFINITE_RETURN'] += 1
+            period['entry']['NONFINITE_RETURN'] += 1
             continue
         partition = 'HOLDOUT' if i + 1 >= holdout_start else 'DEVELOPMENT'
+        period['trades'] += 1
         results.append({'signal_at': bars[i].at, 'entry_at': nextbar.at,
                         'exit_at': bars[exit_index].at, 'entry': round(fill, 8),
                         'stop': round(stop, 8), 'target': round(target, 8),
@@ -158,6 +185,25 @@ def replay(ins: Instrument, bars: list[Candle], strategy: str = 'PULLBACK',
         # Prevent overlapping positions. Signals on exit day may place a new
         # next-day order, but never open a position while another is active.
         next_eligible_signal = exit_index
+
+    period_reports = []
+    for label, p in periods.items():
+        start, stop = p['start'], p['end']
+        period_reports.append({
+            'label': label, 'first_signal_index': start,
+            'last_signal_index_exclusive': stop,
+            'first_signal_at': bars[start].at if start < stop else None,
+            'last_signal_at': bars[stop - 1].at if start < stop else None,
+            'eligible_signal_bars': p['eligible'], 'qualified_setups': p['qualified'],
+            'research_gate_passed': p['gate'], 'completed_trades': p['trades'],
+            'overlap_skipped_bars': p['skipped'],
+            'setup_rejection_reasons': dict(sorted(p['setup'].items())),
+            'unique_setup_rejected_bars': sum(p['combinations'].values()),
+            'exclusive_setup_rejections': dict(sorted(p['exclusive'].items())),
+            'setup_rejection_combinations': dict(sorted(p['combinations'].items())),
+            'research_gate_rejection_reasons': dict(sorted(p['research'].items())),
+            'entry_rejection_reasons': dict(sorted(p['entry'].items())),
+        })
 
     development = [t for t in results if t['partition'] == 'DEVELOPMENT']
     holdout = [t for t in results if t['partition'] == 'HOLDOUT']
@@ -186,6 +232,7 @@ def replay(ins: Instrument, bars: list[Candle], strategy: str = 'PULLBACK',
             'setup_rejection_combinations': dict(sorted(rejection_sets.items())),
             'research_gate_rejection_reasons': dict(sorted(gate_rejected.items())),
             'entry_rejection_reasons': dict(sorted(entry_rejected.items())),
+            'signal_periods': period_reports,
             'note': 'Rejection reasons may overlap per signal; counts are diagnostic, not calibrated probabilities.',
         },
         'assumption': 'Final EOD signals; next-bar entry; one open trade; same-bar stop first; gap-through-stop at opening; 0.1% modeled friction each side.',

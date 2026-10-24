@@ -41,6 +41,7 @@ def summarize_replay(result: dict) -> dict:
         'overlap_skipped_bars': d['overlap_skipped_bars'],
         'unique_setup_rejected_bars': d.get('unique_setup_rejected_bars'),
         'exclusive_setup_rejections': d.get('exclusive_setup_rejections', {}),
+        'signal_periods': d.get('signal_periods', []),
         'top_rejection_combinations': dict(sorted(
             d.get('setup_rejection_combinations', {}).items(),
             key=lambda pair: (-pair[1], pair[0]))[:5]),
@@ -143,6 +144,14 @@ def main(argv=None) -> int:
                 if reasons:
                     top = sorted(reasons.items(), key=lambda entry: (-entry[1], entry[0]))[:5]
                     print(f"  {stage}: {dict(top)} (overlapping counts)")
+            for period in item['signal_periods']:
+                leading = sorted(period['setup_rejection_combinations'].items(),
+                                 key=lambda pair: (-pair[1], pair[0]))[:2]
+                print(f"  {period['label']}: eligible={period['eligible_signal_bars']} "
+                      f"qualified={period['qualified_setups']} "
+                      f"trades={period['completed_trades']} "
+                      f"dates={period['first_signal_at']}..{period['last_signal_at']}")
+                print(f"    top_combinations={dict(leading)} (disjoint per signal)")
         print('RESEARCH_ONLY; validated=false; no provider or broker request')
     return 0
 

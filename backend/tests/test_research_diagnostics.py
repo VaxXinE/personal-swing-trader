@@ -134,3 +134,45 @@ def test_research_summary_reports_exclusive_failure_without_false_profit_claims(
         'PULLBACK_NOT_NEAR_SUPPORT|RR_BELOW_MIN': 17, 'RR_BELOW_MIN': 3}
     assert report['net_expectancy_r'] is None
     assert report['bottleneck'] == 'TECHNICAL_SETUP'
+
+
+def test_chronological_signal_windows_reconcile_global_counters(tmp_path):
+    from app.backtest import replay
+    from backend.tests.test_backtest_integration import engineered_bars
+    ins = INSTRUMENTS[0]
+    for strategy in ('PULLBACK', 'BREAKOUT'):
+        bars = engineered_bars(strategy)
+        diagnostics = replay(ins, bars, strategy)['diagnostics']
+        early, late = diagnostics['signal_periods']
+        assert (early['label'], late['label']) == ('EARLY', 'LATE')
+        assert early['first_signal_index'] == 210
+        assert early['last_signal_index_exclusive'] == late['first_signal_index']
+        assert late['last_signal_index_exclusive'] == len(bars) - 10
+        assert early['last_signal_at'] < late['first_signal_at']
+        for period in (early, late):
+            assert (period['eligible_signal_bars'] + period['overlap_skipped_bars']
+                    == period['last_signal_index_exclusive'] - period['first_signal_index'])
+            assert (sum(period['setup_rejection_combinations'].values())
+                    == period['unique_setup_rejected_bars'])
+            assert (period['unique_setup_rejected_bars'] + period['qualified_setups']
+                    == period['eligible_signal_bars'])
+        for key in ('eligible_signal_bars', 'qualified_setups', 'research_gate_passed',
+                    'completed_trades', 'overlap_skipped_bars',
+                    'unique_setup_rejected_bars'):
+            assert sum(p[key] for p in (early, late)) == diagnostics[key]
+        for key in ('setup_rejection_reasons', 'exclusive_setup_rejections',
+                    'setup_rejection_combinations', 'research_gate_rejection_reasons',
+                    'entry_rejection_reasons'):
+            for reason, count in diagnostics[key].items():
+                assert sum(p[key].get(reason, 0) for p in (early, late)) == count
+
+
+def test_short_history_yields_empty_diagnostic_windows():
+    from app.backtest import MIN_WARMUP, replay
+    from backend.tests.test_backtest_integration import engineered_bars
+    report = replay(INSTRUMENTS[0], engineered_bars('PULLBACK')[:MIN_WARMUP])
+    assert report['samples'] == 0
+    for period in report['diagnostics']['signal_periods']:
+        assert period['eligible_signal_bars'] == 0
+        assert period['first_signal_at'] is None
+        assert period['last_signal_at'] is None
