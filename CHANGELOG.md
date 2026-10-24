@@ -1,3 +1,10 @@
+## 2026-10-25 — IDX holiday evidence and extended real-price research pilot
+
+- Reconcile the IDX 17–25 March 2026 long gap against published exchange holiday evidence; allow only those five documented weekday closures, retaining archived flags and applying a narrowly scoped review marker.
+- Block missing additional weekdays, false candles on published closures, unexplained gaps on US/other periods, and suspected split/outlier price jumps.
+- Expand cloud LIVE research matrix from 3 assets to 7 and lookback 2025-04-01–2026-10-20; no trading or strategy changes, no public redistribution of provider OHLCV.
+- Add regression tests and calendar-source provenance. Apply anti-slop (no empty comments or inflated claims) and ponytail (smallest change using standard library and existing audit).
+
 ## 2026-10-25 — Real internet market research verification
 
 - Add opt-in / provider-change-triggered GitHub-hosted market-data smoke checks for genuine MSFT, BBCA.JK and BTCUSDT daily bars over 2025-10-01 to 2026-10-20.

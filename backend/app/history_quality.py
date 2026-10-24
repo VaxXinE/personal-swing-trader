@@ -16,6 +16,8 @@ from zoneinfo import ZoneInfo
 
 from .domain import Instrument, Candle, validate_candles
 from .history import HistoryError, _session, _timestamp, _digest
+from .market_calendar import (IDX_MARCH_2026_CLOSURES, IDX_MARCH_2026_SOURCE,
+                              IDX_MARCH_2026_REVIEW_VERSION, reviewed_idx_gap)
 
 MAX_CALENDAR_BYTES = 512 * 1024
 MAX_CALENDAR_SESSIONS = 5000
@@ -111,6 +113,7 @@ def audit_snapshot(instrument: Instrument, snapshot: Mapping, *,
     seen_dates: set[date] = set()
     previous = None
     suspicious_sessions: set[date] = set()
+    reviewed_long_gaps = 0
     cutoff = _timestamp(snapshot['as_of_observation'])
     for row in records:
         if not isinstance(row, dict) or not isinstance(row.get('candle'), dict):
@@ -131,6 +134,8 @@ def audit_snapshot(instrument: Instrument, snapshot: Mapping, *,
         if session in seen_dates:
             add('DUPLICATE_MARKET_SESSION', 'BLOCK', session_string)
         seen_dates.add(session)
+        if market == 'IDX' and session in IDX_MARCH_2026_CLOSURES:
+            add('CANDLE_ON_REVIEWED_IDX_CLOSURE', 'BLOCK', session_string)
         if market in ('US', 'IDX') and session.weekday() >= 5:
             add('WEEKEND_EQUITY_SESSION', 'BLOCK', session_string)
         if market == 'CRYPTO':
@@ -148,7 +153,10 @@ def audit_snapshot(instrument: Instrument, snapshot: Mapping, *,
             if market == 'CRYPTO' and gap > 1:
                 add('MISSING_CRYPTO_DAILY_CANDLE', 'BLOCK', session_string)
             if market != 'CRYPTO' and gap > 7:
-                add('LONG_GAP_REQUIRES_CALENDAR_REVIEW', 'BLOCK', session_string)
+                if reviewed_idx_gap(market, prev_session, session):
+                    reviewed_long_gaps += 1
+                else:
+                    add('LONG_GAP_REQUIRES_CALENDAR_REVIEW', 'BLOCK', session_string)
             if market != 'CRYPTO' and prev_bar.close > 0 and abs(bar.close / prev_bar.close - 1) > 0.35:
                 add('SPLIT_OR_OUTLIER_SUSPECTED', 'BLOCK', session_string)
                 suspicious_sessions.add(session)
@@ -163,6 +171,11 @@ def audit_snapshot(instrument: Instrument, snapshot: Mapping, *,
     calendar_details = None
     if market == 'CRYPTO':
         coverage = 'CONTINUOUS_UTC_RULE_ONLY'
+    elif calendar is None and reviewed_long_gaps:
+        coverage = 'PARTIAL_REVIEWED_IDX_CLOSURES'
+        calendar_details = {'source': IDX_MARCH_2026_SOURCE,
+                            'review_version': IDX_MARCH_2026_REVIEW_VERSION,
+                            'scope': 'Only 18-24 March 2026 exchange closures; no full session calendar'}
     elif calendar is not None:
         coverage = 'PROVIDED_UNVERIFIED'
         calendar_details = {'source': calendar.source, 'observed_at': calendar.observed_at,
@@ -245,6 +258,7 @@ def audit_snapshot(instrument: Instrument, snapshot: Mapping, *,
             for r in records
         ],
         'calendar_sha256': calendar.sha256 if calendar else None,
+        'reviewed_gap_evidence': IDX_MARCH_2026_REVIEW_VERSION if reviewed_long_gaps else None,
         'reference_sha256': source_hash,
         'actions': actions or [],
     })
@@ -255,6 +269,7 @@ def audit_snapshot(instrument: Instrument, snapshot: Mapping, *,
             'instrument_id': instrument.instrument_id, 'price_basis': snapshot.get('price_basis'),
             'source': snapshot.get('source'), 'rows': len(records),
             'calendar_coverage': coverage, 'calendar_evidence': calendar_details,
+            'reviewed_long_gap_count': reviewed_long_gaps,
             'split_evidence_matches': matching_evidence,
             'reference_comparison': reference_details,
             'finding_counts': dict(sorted(counts.items())), 'findings': findings,

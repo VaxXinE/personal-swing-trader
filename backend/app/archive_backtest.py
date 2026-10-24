@@ -15,6 +15,7 @@ from .backtest import MIN_WARMUP, replay
 from .domain import Candle, Instrument
 from .history import HistoryError, HistoryStore
 from .history_quality import audit_snapshot
+from .market_calendar import reviewed_idx_gap
 from .universe_history import UniverseHistory
 
 
@@ -34,6 +35,7 @@ _ALLOWED_FLAGS = frozenset({
     'SYNTHETIC_NOT_MARKET_DATA', 'PRICE_BASIS_UNVERIFIED',
     'CORPORATE_ACTIONS_UNVERIFIED', 'SESSION_CALENDAR_UNVERIFIED',
     'BACKFILLED_FIRST_OBSERVED_NOW',
+    'REVIEWED_IDX_MARCH_2026_HOLIDAY_GAP',
 })
 _HASH = re.compile(r'[0-9a-f]{64}\Z')
 
@@ -109,6 +111,8 @@ def replay_from_archive(
             code for code, count in quality['finding_counts'].items() if count))
 
     flags = set(snapshot['quality_flags'])
+    reviewed_long_gap = False
+    unreviewed_long_gap = False
     # Independently check adjacent archived rows. The current archive's per-row
     # checksum covers payload_json, not flags_json or market session metadata;
     # therefore metadata flags alone are NOT a sufficient quality gate.
@@ -116,11 +120,21 @@ def replay_from_archive(
         days = (date.fromisoformat(current['session_date']) -
                 date.fromisoformat(prev['session_date'])).days
         if days > 7:
-            flags.add('LONG_GAP_REQUIRES_CALENDAR_REVIEW')
+            if reviewed_idx_gap(instrument.market,
+                                date.fromisoformat(prev['session_date']),
+                                date.fromisoformat(current['session_date'])):
+                reviewed_long_gap = True
+            else:
+                unreviewed_long_gap = True
+                flags.add('LONG_GAP_REQUIRES_CALENDAR_REVIEW')
         if instrument.market != 'CRYPTO':
             prior_close = prev['candle']['close']
             if prior_close <= 0 or abs(current['candle']['close'] / prior_close - 1) > .35:
                 flags.add('SPLIT_OR_OUTLIER_SUSPECTED')
+    # Stored flags are immutable: override only a proven historical false-positive.
+    if reviewed_long_gap and not unreviewed_long_gap:
+        flags.discard('LONG_GAP_REQUIRES_CALENDAR_REVIEW')
+        flags.add('REVIEWED_IDX_MARCH_2026_HOLIDAY_GAP')
     blocked = sorted(flags & _BLOCKING_FLAGS)
     unexpected = sorted(flags - _BLOCKING_FLAGS - _ALLOWED_FLAGS)
     if blocked or unexpected:

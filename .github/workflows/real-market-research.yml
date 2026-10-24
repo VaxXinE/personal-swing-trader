@@ -22,8 +22,12 @@ jobs:
       matrix:
         include:
           - {market: US, symbol: MSFT, instrument: 'US:NASDAQ:MSFT'}
+          - {market: US, symbol: NVDA, instrument: 'US:NASDAQ:NVDA'}
+          - {market: US, symbol: AAPL, instrument: 'US:NASDAQ:AAPL'}
           - {market: IDX, symbol: BBCA, instrument: 'IDX:IDX:BBCA'}
+          - {market: IDX, symbol: BBRI, instrument: 'IDX:IDX:BBRI'}
           - {market: CRYPTO, symbol: BTCUSDT, instrument: 'CRYPTO:BINANCE:BTCUSDT'}
+          - {market: CRYPTO, symbol: ETHUSDT, instrument: 'CRYPTO:BINANCE:ETHUSDT'}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -42,7 +46,7 @@ jobs:
           python scripts/history_ingest.py \
             --mode live --allow-live \
             --instrument-id "$INSTRUMENT_ID" \
-            --start-date 2025-10-01 --end-date 2026-10-20 \
+            --start-date 2025-04-01 --end-date 2026-10-20 \
             --db "$DB_FILE"
           set +e
           python scripts/history_quality_audit.py \
@@ -59,7 +63,8 @@ jobs:
           exit_code = int(os.environ['AUDIT_EXIT'])
           assert (status == 'BLOCKED') == (exit_code == 2), (status, exit_code)
           assert exit_code in (0, 2), (status, exit_code)
-          print(f"REAL_PROVIDER_QUALITY status={status} findings={report['finding_counts']}")
+          print(f"REAL_PROVIDER_QUALITY status={status} findings={report['finding_counts']} "
+                f"reviewed_long_gaps={report['reviewed_long_gap_count']}")
           print(f"evidence_sha256={report['evidence_sha256']}")
           PY
           if [[ "$AUDIT_EXIT" -eq 0 ]]; then
@@ -84,12 +89,5 @@ jobs:
           print(f"REAL_PROVIDER_CAPTURE_OK market={os.environ['MARKET']} "
                 f"source={source} price_basis={basis} rows={count} "
                 f"first_session={first} last_session={last}")
-          from datetime import date
-          sessions = [date.fromisoformat(r[0]) for r in db.execute(
-              'SELECT session_date FROM history_candles WHERE instrument_id=? ORDER BY session_date',
-              (os.environ['INSTRUMENT_ID'],))]
-          for previous, current in zip(sessions, sessions[1:]):
-              if (current - previous).days > 7:
-                  print(f"LONG_GAP_REQUIRES_REVIEW previous_session={previous} next_session={current}")
           print("RESEARCH_ONLY; live trades=DISABLED; output SQLite kept on ephemeral CI runner")
           PY

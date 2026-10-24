@@ -193,3 +193,75 @@ def test_cli_quality_audit_is_offline(tmp_path,capsys):
     report=json.loads(capsys.readouterr().out)
     assert report['status']=='STRUCTURAL_PASS'
     assert report['point_in_time_validated'] is False
+
+
+def idx_market_bars(*, missing=frozenset(), add_holiday=False):
+    from app.market_calendar import IDX_MARCH_2026_CLOSURES
+    days = []
+    day = date(2025, 5, 5)
+    while day < date(2026, 5, 2):
+        if day.weekday() < 5 and day not in IDX_MARCH_2026_CLOSURES and day not in missing:
+            days.append(day)
+        day += timedelta(days=1)
+    if add_holiday:
+        days.append(date(2026, 3, 20))
+        days.sort()
+    return [
+        Candle(datetime(d.year,d.month,d.day,9,2,tzinfo=timezone.utc)
+               .isoformat().replace('+00:00','Z'), 100., 104., 97., 101., 500_000.)
+        for d in days
+    ]
+
+
+def test_idx_researched_nyepi_eid_gap_is_not_missing_history(tmp_path):
+    ins = next(i for i in INSTRUMENTS if i.market == 'IDX')
+    store = HistoryStore(tmp_path/'history.sqlite', clock=Clock())
+    store.ingest(ins,idx_market_bars(),source='YFINANCE_RESEARCH_RAW',
+                 price_basis='VENDOR_UNVERIFIED')
+    snap = store.read(ins.instrument_id, source='YFINANCE_RESEARCH_RAW',
+                      price_basis='VENDOR_UNVERIFIED')
+    assert 'LONG_GAP_REQUIRES_CALENDAR_REVIEW' in snap['quality_flags']
+    report = audit_snapshot(ins,snap)
+    assert report['status'] == 'STRUCTURAL_PASS'
+    assert report['reviewed_long_gap_count'] == 1
+    assert report['calendar_validated'] is False
+    assert report['calendar_coverage'] == 'PARTIAL_REVIEWED_IDX_CLOSURES'
+    replay = replay_from_archive(store,ins,mode='live',source='YFINANCE_RESEARCH_RAW',
+                                 price_basis='VENDOR_UNVERIFIED')
+    assert replay['validated'] is False
+    assert replay['archive_snapshot']['quality_report']['reviewed_long_gap_count'] == 1
+    assert 'REVIEWED_IDX_MARCH_2026_HOLIDAY_GAP' in replay['archive_snapshot']['quality_flags']
+    assert 'LONG_GAP_REQUIRES_CALENDAR_REVIEW' not in replay['archive_snapshot']['quality_flags']
+
+
+def test_idx_unexplained_weekday_gap_still_blocks_replay(tmp_path):
+    ins = next(i for i in INSTRUMENTS if i.market == 'IDX')
+    store = HistoryStore(tmp_path/'history.sqlite', clock=Clock())
+    store.ingest(ins, idx_market_bars(missing=frozenset({date(2026,3,17)})),
+                 source='YFINANCE_RESEARCH_RAW', price_basis='VENDOR_UNVERIFIED')
+    snap = store.read(ins.instrument_id,source='YFINANCE_RESEARCH_RAW',
+                      price_basis='VENDOR_UNVERIFIED')
+    assert audit_snapshot(ins,snap)['status'] == 'BLOCKED'
+    with pytest.raises(HistoryError, match='LONG_GAP_REQUIRES_CALENDAR_REVIEW'):
+        replay_from_archive(store, ins, mode='live',
+                            source='YFINANCE_RESEARCH_RAW',price_basis='VENDOR_UNVERIFIED')
+
+
+def test_idx_candle_on_declared_exchange_closure_blocks(tmp_path):
+    ins = next(i for i in INSTRUMENTS if i.market == 'IDX')
+    store = HistoryStore(tmp_path/'history.sqlite', clock=Clock())
+    store.ingest(ins, idx_market_bars(add_holiday=True),
+                 source='YFINANCE_RESEARCH_RAW',price_basis='VENDOR_UNVERIFIED')
+    snap = store.read(ins.instrument_id,source='YFINANCE_RESEARCH_RAW',
+                      price_basis='VENDOR_UNVERIFIED')
+    report = audit_snapshot(ins,snap)
+    assert report['status'] == 'BLOCKED'
+    assert report['finding_counts']['CANDLE_ON_REVIEWED_IDX_CLOSURE'] == 1
+
+
+def test_reviewed_idx_exception_does_not_apply_to_us_or_outside_march():
+    from app.market_calendar import reviewed_idx_gap
+    assert reviewed_idx_gap('IDX',date(2026,3,17),date(2026,3,25))
+    assert not reviewed_idx_gap('US',date(2026,3,17),date(2026,3,25))
+    assert not reviewed_idx_gap('IDX',date(2026,3,16),date(2026,3,25))
+    assert not reviewed_idx_gap('IDX',date(2026,4,1),date(2026,4,12))

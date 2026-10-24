@@ -209,3 +209,6 @@ Current registry/discovery samples cannot prove who was listed historically. You
 ## Test genuine internet market data (research only)
 
 Use the opt-in [real market research GitHub Actions workflow](https://github.com/VaxXinE/personal-swing-trader/actions/workflows/real-market-research.yml) to check a real, bounded historical slice of MSFT (US), BBCA (IDX), and BTCUSDT (Binance Spot) on an isolated runner. It uses the existing LIVE providers rather than generating synthetic candles, and stores no third-party prices in Git or public Actions artifacts. To persist data locally, run the explicit `history_ingest.py --mode live --allow-live --instrument-id ... --start-date ... --end-date ...` commands documented in [Historical Data Engine](docs/HISTORICAL_DATA_ENGINE.md). Genuine provider data remains `VENDOR_UNVERIFIED` and backtests remain `RESEARCH_ONLY`.
+
+
+IDX March 2026 historical holiday exception: the 17→25 March BBCA gap matches BEI-announced Nyepi/Eid closures (18–20, 23–24 March) and is now disclosed as a **partial reviewed closure** without claiming an exchange-certified full calendar. Long unexplained gaps continue to block the archived backtest. Real-data CI now researches seven assets across US, IDX and Binance; see [research quality documentation](docs/HISTORY_QUALITY.md).

@@ -77,3 +77,18 @@ Calendar and reference `observed_at` dates later than the selected archive snaps
 The feature is additive and offline: no new dependencies, network permissions, price adjustments, exchange-calendar certification or automated execution. The macOS XProtect popup remains unresolved.
 
 The evidence digest is intentionally **content-addressed**, not wall-clock-addressed: repeated audits of identical revisions/evidence keep the same SHA-256 even when `as_of_observation` advances without any new observations. Pin `--as-of` separately to reproduce the exact visibility cutoff.
+
+
+## Review spesifik kalender BEI: 18–24 Maret 2026
+
+Rekonsiliasi data BBCA dari GitHub CI sebelumnya melaporkan jeda 17 Maret → 25 Maret 2026. Jadwal resmi libur bursa BEI 2026 yang diumumkan pada September 2025 menutup perdagangan pada **18, 19, 20, 23, dan 24 Maret**, sementara 21–22 Maret merupakan akhir pekan. Tinjauan jadwal terpisah dari Panin Sekuritas (12 Maret 2026) juga menegaskan perdagangan dibuka kembali pada **25 Maret**.
+
+Sumber yang ditinjau:
+- https://www.idxchannel.com/market-news/catat-ini-kalender-libur-bursa-efek-indonesia-2026
+- https://pans.co.id/publikasi/info-libur-bursa---hari-suci-nyepi-dan-hari-raya-idul-fitri-2026
+
+Implementasi `backend/app/market_calendar.py` membolehkan **hanya** jeda panjang IDX jika **setiap hari kerja di antaranya** adalah salah satu dari lima tanggal libur tersebut. Hari kerja lain yang hilang tetap **BLOCKED**. Candle yang justru muncul pada salah satu tanggal libur tersebut juga **BLOCKED**. `HistoryStore` tidak mengubah atau menghapus flag asli yang telah tersimpan: Archived Backtest merekonsiliasi flag lama secara terbatas dan mengembalikan `REVIEWED_IDX_MARCH_2026_HOLIDAY_GAP`. Laporan audit menampilkan `reviewed_long_gap_count`, `PARTIAL_REVIEWED_IDX_CLOSURES`, sumber referensi, dan versi tinjauan.
+
+**Bukan kalender resmi lengkap:** aturan ini hanya membuktikan satu interval, bukan seluruh kalender IDX 2025/2026, termasuk penutupan mendadak, suspensi emiten, dan perdagangan sesi khusus. Karena itu `calendar_validated=false`, `point_in_time_validated=false`, `execution_verified=false`, dan `RESEARCH_ONLY` tetap berlaku.
+
+GitHub real-data workflow menggunakan 7 aset (MSFT, NVDA, AAPL, BBCA, BBRI, BTCUSDT, ETHUSDT) untuk jendela riset 2025-04-01 sampai 2026-10-20. CI mengunduh data pasar nyata dari provider yang sudah ada ke SQLite sementara, mengaudit kualitasnya, menjalankan archived PULLBACK hanya saat lolos gate, dan **tidak** mengunggah harga pihak ketiga sebagai artifact publik. Lebih banyak candle tidak menjamin lebih banyak sinyal atau return positif.
