@@ -92,3 +92,11 @@ Most other failed bars have **multiple simultaneous** setup rejections.
 These seven assets were not sampled as a complete historic/delisted universe;
 the result is not an objective strategy-wide performance estimate. Do not
 tune and retest the same data claiming independent out-of-sample validation.
+
+## Fixed EARLY/LATE signal-period diagnostics (2026-10-25)
+
+Backtest V2 now reports `diagnostics.signal_periods` in every replay, and `research_diagnostics.py` includes the same windows in JSON and terminal output for both PULLBACK and BREAKOUT. The two fixed chronological halves divide **eligible signal indices after the 210-bar warmup and before the last horizon bars**; the midpoint uses integer division. Each period includes UTC first/last signal dates, eligible signal bars, qualified setups, research gate passes, trades, overlap-skipped bars, multi-label rejection reasons, and **disjoint** combinations/exclusive rejection counts.
+
+The sum of EARLY+LATE funnels and disjoint combinations must equal the unchanged global funnel. Indicators always use historical prefixes, not a new indicator reset at the window boundary. A simulated trade can exit after the window containing its signal, but its diagnostic attribution remains on that original signal date. The existing 75/25 development/holdout partition is unchanged.
+
+**Not an untouched OOS test:** these same 2025–2026 vendor histories were already inspected before adding periods. The split is strictly an *exploratory stability diagnostic*, and `validated`, `point_in_time_validated`, and `execution_verified` remain false. Zero trades cannot support walk-forward returns, profitability, fee-sensitivity metrics, confidence bands or minimum-sample claims. Any prospective validation requires a frozen universe, rules, exchange calendars, fees and independent later observations **before** examining that period.

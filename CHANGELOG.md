@@ -1,3 +1,10 @@
+## 2026-10-25 — Chronological rejection stability diagnostics (TSK-027 partial)
+
+- Split archived PULLBACK and BREAKOUT research funnels into deterministic EARLY/LATE signal windows while retaining the original signal calculations, fills and 75/25 holdout.
+- Reconcile per-period technical/gate/entry counters and disjoint reason combinations against the global diagnostic counters; cover no-history and engineered-trade fixtures.
+- Extend the offline and seven-market CI reports with time-window summaries, without adding an external provider or changing strategy thresholds.
+- Keep all backtest results RESEARCH_ONLY and descriptive; observed 2025–2026 history is not an untouched prospective validation dataset.
+
 ## 2026-10-25 — Exact technical rejection combinations (TSK-027 partial)
 
 - Trace per-signal *disjoint* rejection combinations and exclusive one-reason failures, so multi-label reasons do not overstate how many bars were rejected.

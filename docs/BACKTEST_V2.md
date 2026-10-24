@@ -74,3 +74,7 @@ For read-only, locally stored observation candles, use `GET /v1/history/backtest
 ## Genuine-price diagnostic pilot (2026-10-25)
 
 Run `python scripts/research_diagnostics.py --mode live --instrument-id US:NASDAQ:MSFT --json` against a previously captured LIVE research archive. Its PULLBACK/BREAKOUT comparisons share the same pinned source and observation time. Use [Research Diagnostics](RESEARCH_DIAGNOSTICS.md) for bottleneck categories and reproducibility limitations. No strategy parameters, sample-size gates or fills were modified.
+
+## Periode sinyal kronologis
+
+`diagnostics.signal_periods` menyimpan EARLY dan LATE berdasarkan tanggal candle sinyal, tanpa mengubah filter maupun trade. Counts per periode dan kombinasi penolakan yang saling terpisah direkonsiliasi ke total global. Ini hanya analisis eksploratif dari harga yang sudah dilihat, **bukan** validasi OOS independen. Lihat [Research Diagnostics](RESEARCH_DIAGNOSTICS.md).
