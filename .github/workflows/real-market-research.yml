@@ -8,6 +8,9 @@ on:
       - .github/workflows/real-market-research.yml
       - scripts/history_ingest.py
       - backend/app/history_sources.py
+      - backend/app/backtest.py
+      - backend/app/archive_backtest.py
+      - scripts/research_diagnostics.py
 
 permissions:
   contents: read
@@ -68,9 +71,9 @@ jobs:
           print(f"evidence_sha256={report['evidence_sha256']}")
           PY
           if [[ "$AUDIT_EXIT" -eq 0 ]]; then
-            python scripts/archive_backtest.py \
+            python scripts/research_diagnostics.py \
               --mode live --instrument-id "$INSTRUMENT_ID" \
-              --strategy PULLBACK --db "$DB_FILE"
+              --strategy BOTH --db "$DB_FILE"
           else
             echo "BACKTEST_SKIPPED: data quarantined pending an exchange-calendar review."
           fi

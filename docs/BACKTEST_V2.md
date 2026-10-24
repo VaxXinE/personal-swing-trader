@@ -69,3 +69,8 @@ friction measured by market, and held-out multi-symbol period tests.
 ## Archived-replay integration
 
 For read-only, locally stored observation candles, use `GET /v1/history/backtests/{instrument_id}?source=SYNTHETIC_FIXTURE&price_basis=SYNTHETIC` in DEMO mode or `python scripts/archive_backtest.py`. The replay result includes an observation-time cutoff and SHA-256 fingerprint so the same revisions can be requested explicitly. No new provider calls are made. This does **not** establish vendor point-in-time availability or validated execution prices. See [ARCHIVED_BACKTEST_INTEGRATION](ARCHIVED_BACKTEST_INTEGRATION.md).
+
+
+## Genuine-price diagnostic pilot (2026-10-25)
+
+Run `python scripts/research_diagnostics.py --mode live --instrument-id US:NASDAQ:MSFT --json` against a previously captured LIVE research archive. Its PULLBACK/BREAKOUT comparisons share the same pinned source and observation time. Use [Research Diagnostics](RESEARCH_DIAGNOSTICS.md) for bottleneck categories and reproducibility limitations. No strategy parameters, sample-size gates or fills were modified.

@@ -1,3 +1,10 @@
+## 2026-10-25 — Zero-trade real-data research diagnostics (TSK-027 partial)
+
+- Add offline dual-strategy archived snapshot funnel diagnosis with pinned observation cutoff, candle digest, and universe-evidence digest; report technical, research gate and next-bar entry rejection counts separately.
+- Differentiate actual setup bottlenecks from insufficient completed-trade sample, without changing any trading criterion or fabricating expectancy.
+- Switch seven-asset real-provider CI from only PULLBACK replay to both PULLBACK and BREAKOUT diagnostics when the quality gate passes; keep all vendor OHLCV ephemeral and not in Git.
+- Add offline regression tests and research reporting guide; no new provider, dependency or secret.
+
 ## 2026-10-25 — IDX holiday evidence and extended real-price research pilot
 
 - Reconcile the IDX 17–25 March 2026 long gap against published exchange holiday evidence; allow only those five documented weekday closures, retaining archived flags and applying a narrowly scoped review marker.

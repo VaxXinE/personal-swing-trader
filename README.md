@@ -212,3 +212,8 @@ Use the opt-in [real market research GitHub Actions workflow](https://github.com
 
 
 IDX March 2026 historical holiday exception: the 17→25 March BBCA gap matches BEI-announced Nyepi/Eid closures (18–20, 23–24 March) and is now disclosed as a **partial reviewed closure** without claiming an exchange-certified full calendar. Long unexplained gaps continue to block the archived backtest. Real-data CI now researches seven assets across US, IDX and Binance; see [research quality documentation](docs/HISTORY_QUALITY.md).
+
+
+### Real-data strategy funnel
+
+After an explicit LIVE historical capture, use `python scripts/research_diagnostics.py --mode live --instrument-id US:NASDAQ:MSFT --json` to compare PULLBACK and BREAKOUT over the same archived snapshot. The research CI runs this on seven US/IDX/crypto datasets and reports multi-label setup, risk-gate and hypothetical next-bar-entry rejections. `trades=0` is data scarcity, not evidence of a successful or failed trading strategy. [Research Diagnostics](docs/RESEARCH_DIAGNOSTICS.md).
