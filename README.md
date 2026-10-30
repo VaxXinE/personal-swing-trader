@@ -225,3 +225,8 @@ Baseline from the seven real-provider research jobs: [2026-10-25 real-market rej
 ## Local database backup and recovery (TSK-005)
 
 Protect both journal and historical research before upgrades: `python scripts/backup.py` creates a versioned snapshot of `data/swing.db` plus `data/history.sqlite` (if present), with checksum manifest and SQLite integrity checks. Use `python scripts/backup.py --verify PATH_TO_BACKUP_DIRECTORY`, then `python scripts/backup.py --restore PATH_TO_BACKUP_DIRECTORY --target NEW_NONEXISTENT_DIRECTORY` for a non-destructive recovery drill. These files are **not encrypted**; keep them off Git and on an encrypted disk. See [Operations](docs/OPERATIONS.md). The repository is still research-only and incomplete for true historical market validation.
+
+
+## Release status (2026-10-30)
+
+This is a **private research beta candidate**, not an independently validated trading system. Automated backend/mobile CI checks and an offline SQLite backup/restore drill are available. Follow the [release readiness gate](docs/RELEASE_READINESS_2026-10-30.md) before using the app on real personal data. Forecast probabilities and real order execution remain disabled; no positive trading edge has been established.

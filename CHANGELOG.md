@@ -1,3 +1,8 @@
+## 2026-10-30 — Release readiness evidence and explicit go/no-go
+
+- Document research-only beta feature gates, actual test evidence, device/manual recovery checks and blockers to trustworthy real-market strategy validation.
+- Keep existing unknowns and zero-trade research baseline visible rather than declaring production readiness on CI compilation alone.
+
 ## 2026-10-30 — TSK-005 private SQLite backup/restore hardening
 
 - Replace single-database ad hoc backup with SQLite online snapshot of journal and history archive, bounded SHA-256 manifest and owner-only local files.

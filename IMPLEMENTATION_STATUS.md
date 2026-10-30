@@ -1,3 +1,7 @@
+## Personal research beta gate — 2026-10-30
+
+**Current software is not a completed market-validated product.** The private research baseline and Android build pipeline operate, but historical market point-in-time evidence, enough actual qualifying trades, source-adjustment reconciliation, unattended EOD reliability and device acceptance remain incomplete. TSK-005 now includes a tested SQLite journal+history backup/restore path with a SHA-256 manifest. See [2026-10-30 release readiness gate](docs/RELEASE_READINESS_2026-10-30.md).
+
 ## v0.3.0-alpha supplement (2026-10-23)
 - FR-005 research strategy validation: new pure-function gate supports technical confirmation, historical liquidity, 0.5–4 ATR stop geometry, structurally anchored target, and a 0.1%/side cost-aware 2R screen. All are **research assumptions**; no historical backtest profitability, trade readiness, or probability claims.
 - Existing signal snapshots are immutable; rerun scanner for new fields. A signal passing the research gate is still NOT cleared for execution.
