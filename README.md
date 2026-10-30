@@ -220,3 +220,8 @@ After an explicit LIVE historical capture, use `python scripts/research_diagnost
 
 
 Baseline from the seven real-provider research jobs: [2026-10-25 real-market rejection funnel](docs/REAL_MARKET_FUNNEL_BASELINE.md). All 14 fixed strategy/asset combinations had zero qualified setups, with documented overlapping reason counts. This is an audit outcome, not a reason to weaken rules or claim strategy performance.
+
+
+## Local database backup and recovery (TSK-005)
+
+Protect both journal and historical research before upgrades: `python scripts/backup.py` creates a versioned snapshot of `data/swing.db` plus `data/history.sqlite` (if present), with checksum manifest and SQLite integrity checks. Use `python scripts/backup.py --verify PATH_TO_BACKUP_DIRECTORY`, then `python scripts/backup.py --restore PATH_TO_BACKUP_DIRECTORY --target NEW_NONEXISTENT_DIRECTORY` for a non-destructive recovery drill. These files are **not encrypted**; keep them off Git and on an encrypted disk. See [Operations](docs/OPERATIONS.md). The repository is still research-only and incomplete for true historical market validation.

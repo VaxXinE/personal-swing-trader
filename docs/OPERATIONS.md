@@ -66,3 +66,18 @@ Pin dependency versions; staging/prototype with fixtures; before major provider/
 ## 8. Data rights and retention
 
 Private research usage still obeys provider terms/rate limits. Retain required datasets per provider contract; lifecycle cleanup must never delete audit snapshots referenced by published signals without explicit data retention decision.
+
+
+## Verified recovery CLI — 2026-10-30 (TSK-005)
+
+Run online SQLite backup **while the app is running**. This uses SQLite's backup API rather than copying a live `-wal` file. Captures `swing.db` and `history.sqlite` when present; the manifest contains SHA-256 and byte counts of both. Every snapshot is SQLite quick-check / foreign-key checked. An old `scripts/backup.py` invocation still creates a backup (now in a timestamped private directory rather than one `.db` file).
+
+```sh
+python scripts/backup.py
+python scripts/backup.py --verify backups/swing-REPLACE_WITH_ACTUAL_FOLDER
+python scripts/backup.py --restore backups/swing-REPLACE_WITH_ACTUAL_FOLDER --target /private/new-recovery-folder
+```
+
+For custom DB locations: `--db /absolute/path/swing.db --history-db /absolute/path/history.sqlite --backup-root /secure/local/path`. **Restoring requires a non-existent directory**; no active database is overwritten. Review restored DBs before configuring the app to use them. Files have owner-only permissions where the OS supports them. Integrity is checked again before and after copy. Run `PYTHONPATH=backend python -m pytest -q backend/tests/test_backup.py` for a restore drill including WAL, checksum corruption, path injection and overwrite refusal.
+
+**Limitations:** These two SQLite snapshots are each consistent but not an atomic cross-database transaction. Backup includes no `data/discovered_universe.json`, external Parquet, secrets, mobile data or user-supplied CSV; archive those separately if applicable. Backups are **not encrypted by this script**; use an encrypted disk/volume and protect offsite transfers. It is not yet a full production disaster-recovery certification. Manual restore drills must be repeated against actual user data.

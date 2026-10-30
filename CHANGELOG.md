@@ -1,3 +1,10 @@
+## 2026-10-30 — TSK-005 private SQLite backup/restore hardening
+
+- Replace single-database ad hoc backup with SQLite online snapshot of journal and history archive, bounded SHA-256 manifest and owner-only local files.
+- Add verify and fail-closed restore to a new directory; no silent overwrite, SQL executed from manifest names, network upload or secret export.
+- Add seven offline regression checks for WAL, two-DB roundtrip, malicious manifests, checksum tampering, symlink and overwrite protections.
+- Keep cross-DB atomicity and at-rest encryption explicitly out of scope, with recovery runbook.
+
 ## 2026-10-25 — Chronological rejection stability diagnostics (TSK-027 partial)
 
 - Split archived PULLBACK and BREAKOUT research funnels into deterministic EARLY/LATE signal windows while retaining the original signal calculations, fills and 75/25 holdout.
