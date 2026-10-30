@@ -75,7 +75,8 @@ def opportunities(market:str='ALL',strategy:str='BOTH',min_score:int=Query(0,ge=
            and (not included_only or x['liquidity']['historical']=='PASS') and
            (search.lower() in x['symbol'].lower() or search.lower() in x['name'].lower())]
     return {'run_id':result['run_id'],'generated_at':result['generated_at'],
-            'mode':settings.data_mode,'total':len(items),'items':items,
+            'mode':settings.data_mode, 'no_cached_run':result.get('no_cached_run',False),
+            'total':len(items),'items':items,
             'errors':result['errors'],'exclusions':result['exclusions'],
             'coverage':result.get('coverage', {}),
             'forecast_status':'NOT_VALIDATED'}

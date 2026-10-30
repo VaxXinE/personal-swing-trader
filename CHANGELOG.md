@@ -1,3 +1,9 @@
+## 2026-10-30 — No surprise LIVE provider scans from read-only browsing
+
+- Change cold-start LIVE GET pages to return a documented empty state instead of invoking external market feeds and creating a scan run.
+- Show a clear Run Scan prompt on the browser; preserve first-load synthetic demo behavior and explicit POST Run Scan.
+- Add API/service regression tests to reject hidden LIVE provider calls and ensure empty cache reads do not mutate storage.
+
 ## 2026-10-30 — Release readiness evidence and explicit go/no-go
 
 - Document research-only beta feature gates, actual test evidence, device/manual recovery checks and blockers to trustworthy real-market strategy validation.

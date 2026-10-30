@@ -87,5 +87,18 @@ def scan(store:Store,mode:str,config:ScreenerConfig)->dict:
 def get_latest(store:Store,mode:str)->dict:
     stored=store.latest_run()
     if stored is None or stored['mode']!=mode:
-        return scan(store,mode,ScreenerConfig(name='All Opportunities',strategy='BOTH'))
-    return {**stored['result'],'run_id':stored['id']}
+        if mode == 'demo':
+            return scan(store,mode,ScreenerConfig(name='All Opportunities',strategy='BOTH'))
+        # LIVE browsing must not initiate provider traffic or persist a surprise scan.
+        return {
+            'run_id': None, 'generated_at': None, 'data_mode': mode, 'count': 0,
+            'items': [], 'errors': [], 'exclusions': [],
+            'coverage': {m: {'attempted': 0, 'analyzed': 0, 'excluded': 0,
+                             'liquidity_passed': 0, 'errors': 0,
+                             'insufficient_history': 0}
+                         for m in ('US', 'IDX', 'CRYPTO')},
+            'forecast_status': 'NOT_VALIDATED',
+            'no_cached_run': True,
+            'analysis_notice': 'No saved LIVE scan. Run Scan explicitly to query providers.',
+        }
+    return {**stored['result'],'run_id':stored['id'], 'no_cached_run': False}

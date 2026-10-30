@@ -81,3 +81,8 @@ python scripts/backup.py --restore backups/swing-REPLACE_WITH_ACTUAL_FOLDER --ta
 For custom DB locations: `--db /absolute/path/swing.db --history-db /absolute/path/history.sqlite --backup-root /secure/local/path`. **Restoring requires a non-existent directory**; no active database is overwritten. Review restored DBs before configuring the app to use them. Files have owner-only permissions where the OS supports them. Integrity is checked again before and after copy. Run `PYTHONPATH=backend python -m pytest -q backend/tests/test_backup.py` for a restore drill including WAL, checksum corruption, path injection and overwrite refusal.
 
 **Limitations:** These two SQLite snapshots are each consistent but not an atomic cross-database transaction. Backup includes no `data/discovered_universe.json`, external Parquet, secrets, mobile data or user-supplied CSV; archive those separately if applicable. Backups are **not encrypted by this script**; use an encrypted disk/volume and protect offsite transfers. It is not yet a full production disaster-recovery certification. Manual restore drills must be repeated against actual user data.
+
+
+## Explicit LIVE scan boundary (2026-10-30)
+
+Read-only GETs (`/v1/opportunities`, `/v1/universe`, `/v1/instruments/{id}/analysis`) **never** fetch providers merely because there is no cached LIVE scan. The empty page shows `no_cached_run=true` and instructs the user to click Run Scan. Only explicit POST `/v1/screeners/runs`, the optional manual `scan_once.py` CLI, or a separately configured scheduler runs provider scans. DEMO keeps its initial fixture-backed scan for tutorial UX. This removes unintended LIVE traffic while browsing, not provider network risk from actual user-triggered Run Scan.
