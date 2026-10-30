@@ -106,3 +106,10 @@ def test_cli_backup_verify_restore(tmp_path, capsys):
     assert main(['--restore',str(backups[0]),'--target',str(tmp_path/'restored')]) == 0
     assert main(['--restore',str(backups[0]),'--target',str(tmp_path/'restored')]) == 2
     assert 'RESTORED' in capsys.readouterr().out
+
+
+def test_relative_input_paths_are_supported(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    seed(tmp_path/'swing.db', 'local')
+    backup = create_backup(Path('swing.db'), Path('missing.sqlite'), Path('backups'))
+    assert 'swing.db' in verify_backup(backup)['files']

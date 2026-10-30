@@ -39,7 +39,7 @@ def checksum(path: Path) -> str:
 def check_database(path: Path) -> None:
     if path.is_symlink() or not path.is_file():
         raise BackupError(f'Not a regular SQLite backup: {path.name}')
-    with closing(sqlite3.connect(path.as_uri() + '?mode=ro', uri=True)) as db:
+    with closing(sqlite3.connect(path.resolve().as_uri() + '?mode=ro', uri=True)) as db:
         if db.execute('PRAGMA quick_check').fetchone()[0] != 'ok':
             raise BackupError(f'SQLite integrity check failed: {path.name}')
         if db.execute('PRAGMA foreign_key_check').fetchone() is not None:
@@ -69,7 +69,7 @@ def create_backup(db_path: Path, history_path: Path, backup_root: Path) -> Path:
             if not original.is_file() or original.is_symlink():
                 raise BackupError('Unsafe SQLite source path')
             dest = pending / name
-            with closing(sqlite3.connect(original.as_uri() + '?mode=ro', uri=True)) as source:
+            with closing(sqlite3.connect(original.resolve().as_uri() + '?mode=ro', uri=True)) as source:
                 with closing(sqlite3.connect(dest)) as output:
                     source.backup(output)
             os.chmod(dest, 0o600)
